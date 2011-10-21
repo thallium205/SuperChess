@@ -126,7 +126,7 @@ public class King extends Piece
         for (int i = kingRow - 1; i > 0; i--)
         {      
             // We only care about the closest non-empty diagonal piece to the king
-            if (!board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
+            if (j <=7 && !board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
             {                   
                 // We are going to check for enemy bishops and queens
                 if (board.getBoard().get(i).get(j).getPieceType().contains("Bishop") || board.getBoard().get(i).get(j).getPieceType().contains("Queen"))
@@ -203,30 +203,28 @@ public class King extends Piece
         j = kingCol + 1;
         for (int i = kingRow + 1; i < 8; i++)
         {
-
-            
-                // We only care about the closest non-empty diagonal piece to the king
-                if (!board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
-                {                   
-                    // We are going to check for enemy bishops and queens
-                    if (board.getBoard().get(i).get(j).getPieceType().contains("Bishop") || board.getBoard().get(i).get(j).getPieceType().contains("Queen"))
+            // We only care about the closest non-empty diagonal piece to the king
+            if (j <= 7 && !board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
+            {                   
+                // We are going to check for enemy bishops and queens
+                if (board.getBoard().get(i).get(j).getPieceType().contains("Bishop") || board.getBoard().get(i).get(j).getPieceType().contains("Queen"))
+                {
+                    if (this.isWhite)
                     {
-                        if (this.isWhite)
-                        {
-                            if (!board.getBoard().get(i).get(j).isWhite())
-                                return true;
-                        }     
+                        if (!board.getBoard().get(i).get(j).isWhite())
+                            return true;
+                    }     
 
-                        else if (!this.isWhite)
-                        {
-                            if (board.getBoard().get(i).get(j).isWhite())
-                                return true;
-                        }
+                    else if (!this.isWhite)
+                    {
+                        if (board.getBoard().get(i).get(j).isWhite())
+                            return true;
                     }
-
-                    // we now break out of the loops because we dont care about anything behind this piece
-                    break;
                 }
+
+                // we now break out of the loops because we dont care about anything behind this piece
+                break;
+            }
             j++;
         }
         
@@ -283,7 +281,7 @@ public class King extends Piece
         for (int i = kingRow + 1; i < 0; i++)
         {           
             // We only care about the closest non-empty diagonal piece to the king
-            if (!board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
+            if (j >= 0 && !board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
             {                   
                 // We are going to check for enemy bishops and queens
                 if (board.getBoard().get(i).get(j).getPieceType().contains("Bishop") || board.getBoard().get(i).get(j).getPieceType().contains("Queen"))
@@ -360,7 +358,7 @@ public class King extends Piece
         for (int i = kingRow - 1; i > 0; i--)
         {
             // We only care about the closest non-empty diagonal piece to the king
-            if (!board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
+            if (j >= 0 && !board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
             {                   
                 // We are going to check for enemy bishops and queens
                 if (board.getBoard().get(i).get(j).getPieceType().contains("Bishop") || board.getBoard().get(i).get(j).getPieceType().contains("Queen"))
