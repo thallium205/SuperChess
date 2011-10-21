@@ -36,22 +36,24 @@ public class BoardControls
     
     public void select(String name)
     {
-       Piece piece = board.getPiece(name);       
+       Piece piece = new Piece();
+       piece = board.getPiece(name);       
        piece.getSpatial().setMaterial(selectedPieceMaterial);
        getLegalMoves(piece);
     }
     
     private void getLegalMoves(Piece piece)
     {
-        ArrayList<String> potentialMoves;
+        ArrayList<String> potentialMoves = new ArrayList<String>();
         
         if (piece.getPieceType().contains("Pawn"))
         {         
-            Pawn pawn = (Pawn) piece;
+            Pawn pawn = new Pawn();
+            pawn = (Pawn) piece;
             potentialMoves = pawn.getPotentialMoves(board);
+            System.out.println("AND THE POTENTIAL MOVES ARE:\n");
             for (int i = 0; i < potentialMoves.size(); i++)
-                System.out.println(potentialMoves.get(i));            
-            
+                System.out.println(potentialMoves.get(i));           
         }
         
         else if (piece.getPieceType().contains("Rook"))

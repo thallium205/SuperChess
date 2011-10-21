@@ -73,7 +73,8 @@ public class Pawn extends Piece
                     potentialMoves.add(upperRightRow + "," + upperRightColumn);
             }   
             
-            // Check for placing own king in check!
+            return board.getKing(true).removeIllegalMoves(row, column, potentialMoves, board);
+            
             
         }
         
@@ -117,16 +118,9 @@ public class Pawn extends Piece
             }   
             
             // Check for placing own king in check!
+            return board.getKing(false).removeIllegalMoves(row, column, potentialMoves, board);
             
-        }
-            
-        // CHeck for en passant
-            
-        
-        
-        
-        
-        
-        return potentialMoves;        
+        }        
+        return null;   
     }     
 }

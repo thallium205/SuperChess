@@ -37,7 +37,7 @@ public class Piece
     
     public boolean isWhite()
     {
-        return isWhite();
+        return isWhite;
     }
 
     public int getRow()
