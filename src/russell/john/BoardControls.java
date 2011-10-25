@@ -2,11 +2,11 @@ package russell.john;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
 import java.util.ArrayList;
 
 public class BoardControls 
@@ -16,6 +16,7 @@ public class BoardControls
     Node boardNode;
     Material whiteMaterial, blackMaterial, boardMaterial, emptyMaterial, selectedPieceMaterial, suggestedMovementMaterial;
     BoardType board;
+    Boolean selected = false;
     
     
     
@@ -36,47 +37,95 @@ public class BoardControls
     
     public void select(String name)
     {
-       Piece piece = board.getPiece(name);       
-       piece.getSpatial().setMaterial(selectedPieceMaterial);
-       getLegalMoves(piece);
+       // if (!selected)
+      //  {
+            selected = true;
+           Piece piece = board.getPiece(name);       
+          piece.getSpatial().setMaterial(selectedPieceMaterial);
+           getLegalMoves(piece);
+      //  }
+     //   else
+     //   {
+     //       selected = false;
+    //        Piece piece = board.getPiece(name);       
+    //        piece.getSpatial().setMaterial(emptyMaterial);
+            
+    //    }
+            
     }
     
     private void getLegalMoves(Piece piece)
-    {
+    {        
         ArrayList<String> potentialMoves = new ArrayList<String>();
+        int row, col;
+        Piece p;
         
         if (piece.getPieceType().contains("Pawn"))
         {         
+            System.out.println("Pawn can move:\n");
             Pawn pawn = (Pawn) piece;
             potentialMoves = pawn.getPotentialMoves(board);
-            System.out.println("AND THE POTENTIAL MOVES ARE:\n");
             for (int i = 0; i < potentialMoves.size(); i++)
-                System.out.println(potentialMoves.get(i));            
-            
+            {
+                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
+            }
+                          
         }
         
         else if (piece.getPieceType().contains("Rook"))
         {
+            System.out.println("Rook can move:\n");
+            Rook rook = (Rook) piece;
+            potentialMoves = rook.getPotentialMoves(board);
+            for (int i = 0; i < potentialMoves.size(); i++)
+            {
+                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
+            }
             
         }
         
         else if (piece.getPieceType().contains("Knight"))
         {
+            System.out.println("Knight can move:\n");
+            Knight knight = (Knight) piece;
+            potentialMoves = knight.getPotentialMoves(board);
+            for (int i = 0; i < potentialMoves.size(); i++)
+            {
+                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
+            } 
             
         }
         
         else if (piece.getPieceType().contains("Bishop"))
         {
-            
+            System.out.println("Bishop can move:\n");
+            Bishop bishop = (Bishop) piece;
+            potentialMoves = bishop.getPotentialMoves(board);
+            for (int i = 0; i < potentialMoves.size(); i++)
+            {
+                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
+            }           
         }
         
         else if (piece.getPieceType().contains("Queen"))
         {
-            
-        }
-        
-        else if (piece.getPieceType().contains("Pawn"))
-        {
+            System.out.println("Queen can move:\n");
+            Queen queen = (Queen) piece;
+            potentialMoves = queen.getPotentialMoves(board);
+            for (int i = 0; i < potentialMoves.size(); i++)
+            {
+                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
+            }
             
         }
         
@@ -119,6 +168,7 @@ public class BoardControls
         }
         
          // set white pawns
+        /*
         for (int i = 0; i < 8; i++)
         {
             board.getBoard().get(6).set(i, new Pawn(assetManager, true, 6, i));
@@ -130,6 +180,8 @@ public class BoardControls
                 boardNode.attachChild(board.getBoard().get(6).get(i).getSpatial());
             }
         }
+         * *
+         */
         
         // set black pawns
         for (int i = 0; i < 8; i++)

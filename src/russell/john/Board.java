@@ -106,7 +106,7 @@ public class Board
        
     public void onAction(String name, boolean keyPressed, float tpf) 
     {
-      if (name.equals("pick target")) 
+      if (name.equals("pick target") && keyPressed) 
       {
         // Reset results list.
         CollisionResults results = new CollisionResults();

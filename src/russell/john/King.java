@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class King extends Piece
 {       
+    Piece originalPiece;
     public King()
     {
     
@@ -37,31 +38,44 @@ public class King extends Piece
             int newPieceColumn = Integer.parseInt(potentialMoves.get(i).split(",")[1]);      
             
             // We get a board structure of what it might potentially look like given the potential moves
-            BoardType potentialBoard = potentialMove(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);    
+            potentialMove(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);    
             
             // Now we evaluate the king's predicamate given this new board structure.  
             // If there is a problem with it, will will remove this current potential move from the potentialMoves array list+
             // TODO - if the king itself is moving, getPotentialMoves may need to overload this somehow.. ill cross that when i get there
-            if(isThereAThreat(potentialBoard, potentialMoves.get(i), this.row, this.col))
+            if(isThereAThreat(board, potentialMoves.get(i), this.row, this.col))
                 potentialMoves.remove(i);
+            
+            potentialMoveBack(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);            
         }      
         
         return potentialMoves;
     }
    
-    private BoardType potentialMove(BoardType board, int currentRow, int currentColumn, int newRow, int newColumn)
+    private void potentialMove(BoardType board, int currentRow, int currentColumn, int newRow, int newColumn)
     {
         // we get the piece in the original location
-        Piece piece = board.getBoard().get(currentRow).get(currentColumn);
+        originalPiece = board.getBoard().get(currentRow).get(currentColumn);
         
         // we then replace it with an empty square
         // TODO - FUCK, what about castling??  A separate function will have to be made to handle that
-        board.getBoard().get(currentRow).set(currentColumn, new Empty(assetManager, true, currentRow, currentColumn));
+        board.getBoard().get(currentRow).set(currentColumn, board.getBoard().get(newRow).get(newColumn));
         
         // we now replace the new position with the current piece
-        board.getBoard().get(newRow).set(newColumn, piece);      
+        board.getBoard().get(newRow).set(newColumn, originalPiece);             
+    }
+    
+    private void potentialMoveBack(BoardType board, int currentRow, int currentColumn, int newRow, int newColumn)
+    {
+        // Time to move the piece back
+        Piece newPiece = board.getBoard().get(currentRow).get(currentColumn);
         
-        return board;        
+        // Replace the current with an empty 
+        board.getBoard().get(currentRow).set(currentColumn, originalPiece);
+        
+        // Put the piece back
+        board.getBoard().get(newRow).set(newColumn, newPiece);
+        
     }
     
     private boolean isThereAThreat(BoardType board, String move, int kingRow, int kingCol)
@@ -354,7 +368,7 @@ public class King extends Piece
         }
         
         // Check for bishops and queens  
-        j = kingCol;
+        j = kingCol - 1;
         for (int i = kingRow - 1; i > 0; i--)
         {
             // We only care about the closest non-empty diagonal piece to the king
