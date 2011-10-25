@@ -41,8 +41,8 @@ public class BoardControls
     
     public void select(String name)
     {
-        try
-        {
+       try
+       {
             // Is there a piece already selected
             if (selected)
             {       
@@ -91,16 +91,12 @@ public class BoardControls
             }
                 
             
-        }
+       }
         
-        catch (Exception e)
-        {
+       catch (Exception e)
+       {
             
-        }
-        
-                    
-
-            
+       }   
     }
     
     private boolean isValidMove(String name)
@@ -216,6 +212,13 @@ public class BoardControls
     
     private void deselectPotentialMoves()
     {
+        if (selectedPiece.isWhite() && !selectedPiece.getPieceType().contains("Empty"))
+            selectedPiece.getSpatial().setMaterial(whiteMaterial);
+        else if (!selectedPiece.isWhite() && !selectedPiece.getPieceType().contains("Empty"))
+            selectedPiece.getSpatial().setMaterial(blackMaterial);
+        else if (selectedPiece.getPieceType().contains("Empty"))
+            selectedPiece.getSpatial().setMaterial(emptyMaterial);
+        
         int row, col;
         for (int i = 0; i < selectedPotentialMoves.size(); i++)
         {
@@ -227,14 +230,8 @@ public class BoardControls
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(blackMaterial);
             else if (board.getBoard().get(row).get(col).getPieceType().contains("Empty"))
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(emptyMaterial);                
-        }
+        }        
         
-        if (selectedPiece.isWhite() && !selectedPiece.getPieceType().contains("Empty"))
-            selectedPiece.getSpatial().setMaterial(whiteMaterial);
-        else if (!selectedPiece.isWhite() && !selectedPiece.getPieceType().contains("Empty"))
-            selectedPiece.getSpatial().setMaterial(blackMaterial);
-        else if (selectedPiece.getPieceType().contains("Empty"))
-            selectedPiece.getSpatial().setMaterial(emptyMaterial);
     }
     
     // This fucntion will not be used for castling.
@@ -427,7 +424,10 @@ public class BoardControls
         board.getBoard().get(0).get(4).getSpatial().setLocalTranslation(BoardConstants.vectors.get(0).get(4));
         board.getBoard().get(0).get(4).getSpatial().setMaterial(blackMaterial);
         boardNode.detachChildNamed("Empty,true,0,4");
-        boardNode.attachChild(board.getBoard().get(0).get(4).getSpatial());         
+        boardNode.attachChild(board.getBoard().get(0).get(4).getSpatial());    
+        
+        // rotate the board node so white is on bottom
+        boardNode.setLocalRotation(YAW180);
         
     }
     

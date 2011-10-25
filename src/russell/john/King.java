@@ -2,6 +2,8 @@ package russell.john;
 
 import com.jme3.asset.AssetManager;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public class King extends Piece
 {       
@@ -33,37 +35,47 @@ public class King extends Piece
             int column = this.col;
             
             // A king can move NORTH if either nothing is in front of it or there is an enemy piece
-            if (row != 0)
+            if (row != 0)            
                 if (board.getBoard().get(row - 1).get(column).getPieceType().contains("Empty") || !board.getBoard().get(row - 1).get(column).isWhite)
-                    potentialMoves.add((row - 1) + "," + column);
+                    potentialMoves.add((row - 1) + "," + column);            
+            
             // A king can move NORTH-EAST if either nothing is in front of it or there is an enemy piece
-            if (row != 0 && column != 7)
+            if (row != 0 && column != 7)            
                 if (board.getBoard().get(row - 1).get(column + 1).getPieceType().contains("Empty") || !board.getBoard().get(row - 1).get(column + 1).isWhite);
                     potentialMoves.add((row - 1) + "," + (column + 1));
+            
+            
             // A king can move EAST if either nothing is in front of it or there is an enemy piece
-            if (column != 7)
+            if (column != 7)            
                 if (board.getBoard().get(row).get(column + 1).getPieceType().contains("Empty") || !board.getBoard().get(row).get(column + 1).isWhite)
-                    potentialMoves.add(row + "," + (column + 1));        
+                    potentialMoves.add(row + "," + (column + 1));            
+            
             // A king can move SOUTH-EAST if either nothing is in front of it or there is an enemy piece
-            if (row != 7 && column != 7)
+            if (row != 7 && column != 7)            
                 if (board.getBoard().get(row + 1).get(column + 1).getPieceType().contains("Empty") || !board.getBoard().get(row + 1).get(column + 1).isWhite);
-                    potentialMoves.add((row + 1) + "," + (column + 1)); 
+                    potentialMoves.add((row + 1) + "," + (column + 1));             
+            
             // A king can move SOUTH if either nothing is in front of it or there is an enemy piece
-            if (row != 7)
+            if (row != 7)            
                 if (board.getBoard().get(row + 1).get(column).getPieceType().contains("Empty") || !board.getBoard().get(row + 1).get(column).isWhite)
-                    potentialMoves.add((row + 1) + "," + column);
+                    potentialMoves.add((row + 1) + "," + column);            
+            
             // A king can move SOUTH-WEST if either nothing is in front of it or there is an enemy piece
-            if (row != 7 && column != 0)
+            if (row != 7 && column != 0)            
                 if (board.getBoard().get(row + 1).get(column - 1).getPieceType().contains("Empty") || !board.getBoard().get(row + 1).get(column - 1).isWhite);
-                    potentialMoves.add((row + 1) + "," + (column - 1));                     
+                    potentialMoves.add((row + 1) + "," + (column - 1));             
+            
            // A king can move WEST if either nothing is in front of it or there is an enemy piece
-            if (column != 0)
+            if (column != 0)            
                 if (board.getBoard().get(row).get(column - 1).getPieceType().contains("Empty") || !board.getBoard().get(row).get(column - 1).isWhite)
-                    potentialMoves.add((row - 1) + "," + (column + 1)); 
+                    potentialMoves.add((row - 1) + "," + (column + 1));             
+            
             // A king can move NORTH-WEST if either nothing is in front of it or there is an enemy piece
-            if (row != 0 && column != 0)
+            if (row != 0 && column != 0)            
                 if (board.getBoard().get(row - 1).get(column - 1).getPieceType().contains("Empty") || !board.getBoard().get(row - 1).get(column - 1).isWhite);
-                    potentialMoves.add((row - 1) + "," + (column - 1));                    
+                    potentialMoves.add((row - 1) + "," + (column - 1));
+            
+            
            return removeIllegalMoves(row, column, potentialMoves, board);         
         }
         
@@ -73,37 +85,47 @@ public class King extends Piece
             int column = this.col;
             
             // A king can move NORTH if either nothing is in front of it or there is an enemy piece
-            if (row != 0)
+            if (row != 0)            
                 if (board.getBoard().get(row - 1).get(column).getPieceType().contains("Empty") || board.getBoard().get(row - 1).get(column).isWhite)
-                    potentialMoves.add((row - 1) + "," + column);
+                    potentialMoves.add((row - 1) + "," + column);            
+            
             // A king can move NORTH-EAST if either nothing is in front of it or there is an enemy piece
-            if (row != 0 && column != 7)
-                if (board.getBoard().get(row - 1).get(column + 1).getPieceType().contains("Empty") || board.getBoard().get(row - 1).get(column + 1).isWhite);
-                    potentialMoves.add((row - 1) + "," + (column + 1));
+            if (row != 0 && column != 7)          
+                if (board.getBoard().get(row - 1).get(column + 1).getPieceType().contains("Empty") || board.getBoard().get(row - 1).get(column + 1).isWhite)                
+                    potentialMoves.add((row - 1) + "," + (column + 1));              
+            
             // A king can move EAST if either nothing is in front of it or there is an enemy piece
-            if (column != 7)
+            if (column != 7)  
+            {
                 if (board.getBoard().get(row).get(column + 1).getPieceType().contains("Empty") || board.getBoard().get(row).get(column + 1).isWhite)
-                    potentialMoves.add(row + "," + (column + 1));        
+                    potentialMoves.add(row + "," + (column + 1)); 
+            }
+            
             // A king can move SOUTH-EAST if either nothing is in front of it or there is an enemy piece
-            if (row != 7 && column != 7)
-                if (board.getBoard().get(row + 1).get(column + 1).getPieceType().contains("Empty") || board.getBoard().get(row + 1).get(column + 1).isWhite);
-                    potentialMoves.add((row + 1) + "," + (column + 1)); 
+            if (row != 7 && column != 7)            
+                if (board.getBoard().get(row + 1).get(column + 1).getPieceType().contains("Empty") || board.getBoard().get(row + 1).get(column + 1).isWhite())
+                    potentialMoves.add((row + 1) + "," + (column + 1));             
+            
             // A king can move SOUTH if either nothing is in front of it or there is an enemy piece
-            if (row != 7)
+            if (row != 7)            
                 if (board.getBoard().get(row + 1).get(column).getPieceType().contains("Empty") || board.getBoard().get(row + 1).get(column).isWhite)
-                    potentialMoves.add((row + 1) + "," + column);
+                    potentialMoves.add((row + 1) + "," + column);            
+            
             // A king can move SOUTH-WEST if either nothing is in front of it or there is an enemy piece
-            if (row != 7 && column != 0)
-                if (board.getBoard().get(row + 1).get(column - 1).getPieceType().contains("Empty") || board.getBoard().get(row + 1).get(column - 1).isWhite);
-                    potentialMoves.add((row + 1) + "," + (column - 1));                     
+            if (row != 7 && column != 0)            
+                if (board.getBoard().get(row + 1).get(column - 1).getPieceType().contains("Empty") || board.getBoard().get(row + 1).get(column - 1).isWhite)
+                    potentialMoves.add((row + 1) + "," + (column - 1));               
+            
            // A king can move WEST if either nothing is in front of it or there is an enemy piece
-            if (column != 0)
+            if (column != 0)            
                 if (board.getBoard().get(row).get(column - 1).getPieceType().contains("Empty") || board.getBoard().get(row).get(column - 1).isWhite)
-                    potentialMoves.add((row - 1) + "," + (column + 1)); 
+                    potentialMoves.add((row - 1) + "," + (column + 1));             
+            
             // A king can move NORTH-WEST if either nothing is in front of it or there is an enemy piece
-            if (row != 0 && column != 0)
-                if (board.getBoard().get(row - 1).get(column - 1).getPieceType().contains("Empty") || board.getBoard().get(row - 1).get(column - 1).isWhite);
-                    potentialMoves.add((row - 1) + "," + (column - 1));                    
+            if (row != 0 && column != 0)            
+                if (board.getBoard().get(row - 1).get(column - 1).getPieceType().contains("Empty") || board.getBoard().get(row - 1).get(column - 1).isWhite)
+                    potentialMoves.add((row - 1) + "," + (column - 1)); 
+            
            return removeIllegalMoves(row, column, potentialMoves, board); 
         }
         
@@ -120,8 +142,34 @@ public class King extends Piece
      * @return 
      */
     public ArrayList<String> removeIllegalMoves(int currentPieceRow, int currentPieceColumn, ArrayList<String> potentialMoves, BoardType board)
-    {        
-        for (int i = 0; i < potentialMoves.size(); i++)
+    {    
+        LinkedList tmpLinkedList = new LinkedList(potentialMoves);
+        
+        for (Iterator iter = tmpLinkedList.iterator(); iter.hasNext();)
+        {
+            String move = (String) iter.next();
+            int newPieceRow = Integer.parseInt((move).split(",")[0]);
+            int newPieceColumn = Integer.parseInt((move).split(",")[1]);      
+            
+            // We get a board structure of what it might potentially look like given the potential moves
+            potentialMove(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);    
+            
+            // Now we evaluate the king's predicamate given this new board structure.  
+            // If there is a problem with it, will will remove this current potential move from the potentialMoves array list+
+            // TODO - if the king itself is moving, getPotentialMoves may need to overload this somehow.. ill cross that when i get there
+            if(isThereAThreat(board, move, this.row, this.col))
+                iter.remove();           
+            
+            potentialMoveBack(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);   
+        }
+        
+        potentialMoves.clear();
+        potentialMoves.addAll(tmpLinkedList);
+        return potentialMoves;
+        
+        /*
+        int size = potentialMoves.size();
+        for (int i = 0; i < size; i++)
         {            
             int newPieceRow = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
             int newPieceColumn = Integer.parseInt(potentialMoves.get(i).split(",")[1]);      
@@ -133,12 +181,17 @@ public class King extends Piece
             // If there is a problem with it, will will remove this current potential move from the potentialMoves array list+
             // TODO - if the king itself is moving, getPotentialMoves may need to overload this somehow.. ill cross that when i get there
             if(isThereAThreat(board, potentialMoves.get(i), this.row, this.col))
-                potentialMoves.remove(i);
+                potentialMoves.remove(potentialMoves.get(i));             
             
             potentialMoveBack(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);            
         }      
+         * */
+         
         
-        return potentialMoves;
+        
+       
+        
+       // return potentialMoves;
     }
    
     private void potentialMove(BoardType board, int currentRow, int currentColumn, int newRow, int newColumn)
@@ -147,7 +200,7 @@ public class King extends Piece
         originalPiece = board.getBoard().get(currentRow).get(currentColumn);
         
         // we then replace it with an empty square
-        // TODO - FUCK, what about castling??  A separate function will have to be made to handle that
+        // TODO - What about castling??  A separate function will have to be made to handle that
         board.getBoard().get(currentRow).set(currentColumn, board.getBoard().get(newRow).get(newColumn));
         
         // we now replace the new position with the current piece
