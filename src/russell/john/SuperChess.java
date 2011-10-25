@@ -1,29 +1,22 @@
 package russell.john;
 
 import com.jme3.app.SimpleApplication;
-import com.jme3.collision.CollisionResults;
-import com.jme3.input.MouseInput;
-import com.jme3.input.controls.AnalogListener;
-import com.jme3.input.controls.MouseButtonTrigger;
-import com.jme3.light.AmbientLight;
 import com.jme3.light.PointLight;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Ray;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.elements.render.TextRenderer;
 
 public class SuperChess extends SimpleApplication 
 {
     Quaternion rotate = new Quaternion();
     Vector3f rotateVector = new Vector3f(0,1f,1f);
     PointLight light;
+    Nifty nifty;
 
     public static void main(String[] args) 
     {
@@ -39,7 +32,7 @@ public class SuperChess extends SimpleApplication
         viewPort.setBackgroundColor(ColorRGBA.DarkGray);
         
         // launch the main menu
-       //  launchMainMenu();
+        // launchMainMenu();
         
         // set the camera and scene
         buildCamera();  
@@ -69,13 +62,15 @@ public class SuperChess extends SimpleApplication
     {
         NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);
         /** Create a new NiftyGUI object */
-        Nifty nifty = niftyDisplay.getNifty();
+        nifty = niftyDisplay.getNifty();
         /** Read your XML and initialize your custom ScreenController */
-        nifty.fromXml("Interface/MainMenu.xml", "start", new MainMenuController());
+      //  nifty.fromXml("Interface/MainMenu.xml", "start", new MainMenuController());
+        nifty.fromXml("Interface/Debug.xml", "debugScreen", new DebugController());
+        nifty.getScreen("debugScreen").findElementByName("debugText").getRenderer(TextRenderer.class).setText("FUCK YOU");
         // attach the Nifty display to the gui view port as a processor
         guiViewPort.addProcessor(niftyDisplay);
         // disable the fly cam
-        flyCam.setDragToRotate(true);
+        // flyCam.setDragToRotate(true);
         
         // nifty.exit();
     }
@@ -83,9 +78,11 @@ public class SuperChess extends SimpleApplication
     
     private void buildCamera()
     {      
-        cam.setLocation(new Vector3f(0f, 40f, 15f));
+       // cam.setLocation(new Vector3f(0f, 40f, 15f));
+        cam.setLocation(new Vector3f(0f, 35f, 0f));
         cam.lookAt(Vector3f.ZERO, Vector3f.UNIT_Y);  
-        flyCam.setEnabled(false);
+        flyCam.setEnabled(false);        
+        // flyCam.setDragToRotate(true);        
         inputManager.setCursorVisible(true);
     }
     
@@ -107,6 +104,6 @@ public class SuperChess extends SimpleApplication
         rootNode.attachChild(boardNode); // put this node in the scene
                
         // Instantiate Board object and pass in the node and asset manager
-        Board board = new Board(boardNode, assetManager, inputManager, cam);  
+        Board board = new Board(boardNode, assetManager, inputManager, cam, nifty);  
     }    
 }

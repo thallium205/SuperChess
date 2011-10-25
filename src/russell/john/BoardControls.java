@@ -16,7 +16,11 @@ public class BoardControls
     Node boardNode;
     Material whiteMaterial, blackMaterial, boardMaterial, emptyMaterial, selectedPieceMaterial, suggestedMovementMaterial;
     BoardType board;
+    
+    ArrayList<String> selectedPotentialMoves;
+    Piece selectedPiece;
     Boolean selected = false;
+    
     
     
     
@@ -37,38 +41,97 @@ public class BoardControls
     
     public void select(String name)
     {
-       // if (!selected)
-      //  {
-            selected = true;
-           Piece piece = board.getPiece(name);       
-          piece.getSpatial().setMaterial(selectedPieceMaterial);
-           getLegalMoves(piece);
-      //  }
-     //   else
-     //   {
-     //       selected = false;
-    //        Piece piece = board.getPiece(name);       
-    //        piece.getSpatial().setMaterial(emptyMaterial);
+        try
+        {
+            // Is there a piece already selected
+            if (selected)
+            {       
+                // If so, deselct the last piece (and the potential move sets)
+                deselectPotentialMoves();
+                selected = false;
+                
+                                               
+                // Check to see if the newly selected piece is in the potential move set.
+                // If it is, we will move the piece
+                if(isValidMove(name))
+                {
+                    Piece destinationPiece = board.getPiece(name);
+                    // if it is, move it!
+                    move(selectedPiece, destinationPiece);                    
+                    selected = false;
+                }
+                
+                // If it is not, we will assume the user is selecting a different piece!
+                else
+                {
+                    selectedPiece = board.getPiece(name); 
+                    // Select the new piece if it is not an empty                
+                    if (!selectedPiece.getPieceType().contains("Empty"))
+                    {
+                        selectedPiece.getSpatial().setMaterial(selectedPieceMaterial);
+                        getLegalMoves(selectedPiece);
+                    }
+
+                    // Set this piece to selected
+                    selected = true;    
+                }
+            }
             
-    //    }
+            // If not, select the new piece
+            else
+            {
+                // Select the new piece if it is not an empty
+                selectedPiece = board.getPiece(name);
+                if (!selectedPiece.getPieceType().contains("Empty"))
+                {
+                    selectedPiece.getSpatial().setMaterial(selectedPieceMaterial);
+                    getLegalMoves(selectedPiece);
+                    selected = true;
+                }
+            }
+                
             
+        }
+        
+        catch (Exception e)
+        {
+            
+        }
+        
+                    
+
+            
+    }
+    
+    private boolean isValidMove(String name)
+    {
+        Piece validMovePiece = board.getPiece(name); 
+        // Check to see if the next piece they selected is in the selected potential moves set
+        for (int i = 0; i < selectedPotentialMoves.size(); i++)
+        {
+            if (selectedPotentialMoves.get(i).split(",")[0].contains(Integer.toString(validMovePiece.getRow())) && selectedPotentialMoves.get(i).split(",")[1].contains(Integer.toString(validMovePiece.getColumn())))
+            {                
+                return true;
+            }
+        }
+
+        return false;
     }
     
     private void getLegalMoves(Piece piece)
     {        
-        ArrayList<String> potentialMoves = new ArrayList<String>();
+        selectedPotentialMoves = new ArrayList<String>();
         int row, col;
-        Piece p;
         
         if (piece.getPieceType().contains("Pawn"))
         {         
             System.out.println("Pawn can move:\n");
             Pawn pawn = (Pawn) piece;
-            potentialMoves = pawn.getPotentialMoves(board);
-            for (int i = 0; i < potentialMoves.size(); i++)
+            selectedPotentialMoves = pawn.getPotentialMoves(board);
+            for (int i = 0; i < selectedPotentialMoves.size(); i++)
             {
-                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
             }
                           
@@ -78,11 +141,11 @@ public class BoardControls
         {
             System.out.println("Rook can move:\n");
             Rook rook = (Rook) piece;
-            potentialMoves = rook.getPotentialMoves(board);
-            for (int i = 0; i < potentialMoves.size(); i++)
+            selectedPotentialMoves = rook.getPotentialMoves(board);
+            for (int i = 0; i < selectedPotentialMoves.size(); i++)
             {
-                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
             }
             
@@ -92,11 +155,11 @@ public class BoardControls
         {
             System.out.println("Knight can move:\n");
             Knight knight = (Knight) piece;
-            potentialMoves = knight.getPotentialMoves(board);
-            for (int i = 0; i < potentialMoves.size(); i++)
+            selectedPotentialMoves = knight.getPotentialMoves(board);
+            for (int i = 0; i < selectedPotentialMoves.size(); i++)
             {
-                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
             } 
             
@@ -106,11 +169,11 @@ public class BoardControls
         {
             System.out.println("Bishop can move:\n");
             Bishop bishop = (Bishop) piece;
-            potentialMoves = bishop.getPotentialMoves(board);
-            for (int i = 0; i < potentialMoves.size(); i++)
+            selectedPotentialMoves = bishop.getPotentialMoves(board);
+            for (int i = 0; i < selectedPotentialMoves.size(); i++)
             {
-                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
             }           
         }
@@ -119,14 +182,27 @@ public class BoardControls
         {
             System.out.println("Queen can move:\n");
             Queen queen = (Queen) piece;
-            potentialMoves = queen.getPotentialMoves(board);
-            for (int i = 0; i < potentialMoves.size(); i++)
+            selectedPotentialMoves = queen.getPotentialMoves(board);
+            for (int i = 0; i < selectedPotentialMoves.size(); i++)
             {
-                row = Integer.parseInt(potentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(potentialMoves.get(i).split(",")[1]);
+                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
             }
             
+        }
+        
+        else if (piece.getPieceType().contains("King"))
+        {
+            System.out.println("King can move:\n");
+            King king = (King) piece;
+            selectedPotentialMoves = king.getPotentialMoves(board);
+            for (int i = 0; i < selectedPotentialMoves.size(); i++)
+            {
+                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
+                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
+            }
         }
         
         else
@@ -138,14 +214,62 @@ public class BoardControls
         
     }
     
-    private void deselect(String name)
+    private void deselectPotentialMoves()
     {
+        int row, col;
+        for (int i = 0; i < selectedPotentialMoves.size(); i++)
+        {
+            row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
+            col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
+            if (board.getBoard().get(row).get(col).isWhite && !board.getBoard().get(row).get(col).getPieceType().contains("Empty"))
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(whiteMaterial);
+            else if (!board.getBoard().get(row).get(col).isWhite && !board.getBoard().get(row).get(col).getPieceType().contains("Empty"))
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(blackMaterial);
+            else if (board.getBoard().get(row).get(col).getPieceType().contains("Empty"))
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(emptyMaterial);                
+        }
         
+        if (selectedPiece.isWhite() && !selectedPiece.getPieceType().contains("Empty"))
+            selectedPiece.getSpatial().setMaterial(whiteMaterial);
+        else if (!selectedPiece.isWhite() && !selectedPiece.getPieceType().contains("Empty"))
+            selectedPiece.getSpatial().setMaterial(blackMaterial);
+        else if (selectedPiece.getPieceType().contains("Empty"))
+            selectedPiece.getSpatial().setMaterial(emptyMaterial);
     }
     
-    private void move(Piece piece)
-    {
-        // check for if a pawn is moved to the end of the board
+    // This fucntion will not be used for castling.
+    private void move(Piece startPiece, Piece endPiece)
+    { 
+        int startRow = startPiece.getRow();
+        int startCol = startPiece.getColumn();
+        int endRow = endPiece.getRow();
+        int endCol = endPiece.getColumn();
+        
+        
+        // Update the location of the startPiece with the location of the endPiece
+        startPiece.setRow(endRow);
+        startPiece.setColumn(endCol);        
+        
+        // Copy the start piece to the end piece
+        board.getBoard().get(endRow).set(endCol, startPiece);
+        
+        // Remove the start piece by replacing with an empty
+        board.getBoard().get(startRow).set(startCol, new Empty(assetManager, true, startRow, startCol));
+        
+        // Detach the startPiece from the boardNode
+        boardNode.detachChild(startPiece.getSpatial());
+        
+        // Detach the endPiece from the boardNode
+        boardNode.detachChild(endPiece.getSpatial());       
+        
+        // Attach the empty piece to the boardnode
+        boardNode.attachChild(board.getBoard().get(startRow).get(startCol).getSpatial());
+        board.getBoard().get(startRow).get(startCol).getSpatial().setLocalTranslation(BoardConstants.vectors.get(startRow).get(startCol));
+        board.getBoard().get(startRow).get(startCol).getSpatial().setMaterial(emptyMaterial);
+        
+        // Attach the the startPiece with the location of the endPiece to the boardNode
+        boardNode.attachChild(board.getBoard().get(endRow).get(endCol).getSpatial());
+        startPiece.getSpatial().setLocalTranslation(BoardConstants.vectors.get(endRow).get(endCol));
         
     }
     
@@ -168,7 +292,6 @@ public class BoardControls
         }
         
          // set white pawns
-        /*
         for (int i = 0; i < 8; i++)
         {
             board.getBoard().get(6).set(i, new Pawn(assetManager, true, 6, i));
@@ -180,8 +303,6 @@ public class BoardControls
                 boardNode.attachChild(board.getBoard().get(6).get(i).getSpatial());
             }
         }
-         * *
-         */
         
         // set black pawns
         for (int i = 0; i < 8; i++)

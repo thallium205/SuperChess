@@ -3,9 +3,10 @@ package russell.john;
 import com.jme3.asset.AssetManager;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.InputManager;
-import com.jme3.input.MouseInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.input.TouchInput;
+import com.jme3.input.controls.TouchListener;
+import com.jme3.input.controls.TouchTrigger;
+import com.jme3.input.event.TouchEvent;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
@@ -16,6 +17,8 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node; 
 import com.jme3.scene.Spatial;
+import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.elements.render.TextRenderer;
 
 public class Board 
 {
@@ -25,16 +28,18 @@ public class Board
     InputManager inputManager;
     Camera camera;
     BoardControls boardControls;
+    Nifty nifty;
     
     
     
     
-    public Board (Node boardNode, AssetManager assetManager, InputManager inputManager, Camera camera)
+    public Board (Node boardNode, AssetManager assetManager, InputManager inputManager, Camera camera, Nifty nifty)
     {
         this.boardNode = boardNode;
         this.assetManager = assetManager;
         this.inputManager = inputManager;
         this.camera = camera;
+        this.nifty = nifty;
         
         // Set Materials
         buildMaterials();
@@ -97,54 +102,78 @@ public class Board
     private void setListener()
     {
          /** Declaring the "Shoot" action and mapping to its triggers. */
-        inputManager.addMapping("pick target", new MouseButtonTrigger(MouseInput.BUTTON_LEFT)); // trigger 2: left-button click
-        inputManager.addListener(actionListener, "pick target");              
+        // inputManager.add
+        inputManager.addListener(touchListener, new String[]{"TouchAll"});     
+        inputManager.addMapping("TouchAll", new TouchTrigger(TouchInput.ALL));
     }    
     
-   private ActionListener actionListener = new ActionListener() 
+   private TouchListener touchListener = new TouchListener() 
    {      
-       
-    public void onAction(String name, boolean keyPressed, float tpf) 
+    @Override
+    public void onTouch(String name, TouchEvent touchEvent, float tpf) 
     {
-      if (name.equals("pick target") && keyPressed) 
-      {
-        // Reset results list.
-        CollisionResults results = new CollisionResults();
+     // if (name.equals("pick target") && keyPressed) 
         
-        // Convert screen click to 3d position        
-        Vector2f click2d = inputManager.getCursorPosition();
-        Vector3f click3d = camera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
-        Vector3f dir = camera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d);
-        
-        // Aim the ray from the clicked spot forwards.
-        Ray ray = new Ray(click3d, dir);
-        
-        // Collect intersections between ray and all nodes in results list.
-        boardNode.collideWith(ray, results);  
-        
-        // (Print the results so we see what is going on:)
-        /*
-        for (int i = 0; i < results.size(); i++) 
+        if (touchEvent.getType().equals(TouchEvent.Type.TAP))
         {
-          // (For each “hit”, we know distance, impact point, geometry.)
-          float dist = results.getCollision(i).getDistance();
-          Vector3f pt = results.getCollision(i).getContactPoint();
-          String target = results.getCollision(i).getGeometry().getName();
-          System.out.println("Selection #" + i + ": " + target + " at " + pt + ", " + dist + " WU away.");
+
+            // Reset results list.
+            CollisionResults results = new CollisionResults();
+
+            // Convert screen click to 3d position        
+            // Vector2f click2d = inputManager.getCursorPosition();
+            Vector2f click2d = new Vector2f(touchEvent.getX(), touchEvent.getY());
+            Vector3f click3d = camera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+            Vector3f dir = camera.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d);
+
+            // Aim the ray from the clicked spot forwards.
+            Ray ray = new Ray(click3d, dir);
+
+            // Collect intersections between ray and all nodes in results list.
+            boardNode.collideWith(ray, results);  
+
+            // Use the results -- we rotate the selected geometry.
+            if (results.size() > 0) 
+            {
+              // The closest result is the target that the player picked:
+              Geometry target = results.getClosestCollision().getGeometry();
+
+              boardControls.select(target.getName());
+            }
         }
-         * 
-         */
         
-        // Use the results -- we rotate the selected geometry.
-        if (results.size() > 0) 
+        else if (touchEvent.getType().equals(TouchEvent.Type.MOVE))            
+        {  
+            Vector3f currentCamera = camera.getLocation();
+            Float dx, dz;
+            
+            if (touchEvent.getDeltaX() > 5)            
+                dx = .5f;           
+            else if (touchEvent.getDeltaX() < -5)            
+                dx = -.5f;       
+            else
+                dx = 0f;
+            if (touchEvent.getDeltaY() > 5)
+                dz = -.5f;
+            else if (touchEvent.getDeltaY() < -5)                
+                dz = .5f;
+            else
+                dz = 0f;
+            
+            camera.setLocation(new Vector3f(currentCamera.getX() + dx, currentCamera.getY(), currentCamera.getZ() + dz));
+            camera.lookAt(new Vector3f(camera.getLocation().getX(), 0f, camera.getLocation().getZ()), Vector3f.UNIT_Y);
+        }       
+        
+        else if (touchEvent.getType().equals(TouchEvent.Type.SCALE_MOVE))
         {
-          // The closest result is the target that the player picked:
-          Geometry target = results.getClosestCollision().getGeometry();
-          
-          // Here comes the action:
-          boardControls.select(target.getName());
+            if (touchEvent.getScaleFactor() > 1)
+                camera.setLocation(new Vector3f(camera.getLocation().getX(), camera.getLocation().getY() - .3f, camera.getLocation().getZ()));
+            else
+                camera.setLocation(new Vector3f(camera.getLocation().getX(), camera.getLocation().getY() + .3f, camera.getLocation().getZ()));
+
+           //  nifty.getScreen("debugScreen").findElementByName("debugText").getRenderer(TextRenderer.class).setText("" + touchEvent.getScaleFactor());         
+            
         }
-      } 
     }
   };
     }
