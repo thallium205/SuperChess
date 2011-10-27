@@ -85,7 +85,7 @@ public class Bishop extends Piece
             
             // Move SOUTH-WEST
             j = column - 1;
-            for (int i = row + 1; i < 0; i++)
+            for (int i = row + 1; i < 8; i++)
             {                  
                 // If there is nothing in the way, it can move there
                 if (j >= 0 && board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
@@ -195,7 +195,7 @@ public class Bishop extends Piece
             
             // Move SOUTH-WEST
             j = column - 1;
-            for (int i = row + 1; i < 0; i++)
+            for (int i = row + 1; i < 8; i++)
             {      
                 // If there is nothing in the way, it can move there
                 if (j >= 0 && board.getBoard().get(i).get(j).getPieceType().contains("Empty"))

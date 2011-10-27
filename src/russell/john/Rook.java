@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 public class Rook extends Piece
 {       
+    // Used for castling logic
+    private Boolean hasMoved;
+    
     public Rook()
     {
     
@@ -20,6 +23,7 @@ public class Rook extends Piece
        this.piece = this.assetManager.loadModel("Models/Rook.j3o");  
        this.piece.setName("Rook," + this.isWhite + "," + this.row + "," + this.col);
        this.pieceType = "Rook";
+       this.hasMoved = false;
     }   
     
     public ArrayList<String> getPotentialMoves(BoardType board)
@@ -59,7 +63,7 @@ public class Rook extends Piece
                 {                    
                     // If there is nothing in the way, it can move there
                     if (board.getBoard().get(row).get(i).getPieceType().contains("Empty"))
-                        potentialMoves.add(i + "," + column);
+                        potentialMoves.add(row + "," + i);
 
                     // Else if there is a piece that is black, it can move there and not any further                        
                     else if (!board.getBoard().get(row).get(i).isWhite())
@@ -103,7 +107,7 @@ public class Rook extends Piece
                 {
                     // If there is nothing in the way, it can move there
                     if (board.getBoard().get(row).get(i).getPieceType().contains("Empty"))
-                        potentialMoves.add(i + "," + column);
+                        potentialMoves.add(row + "," + i);
 
                     // Else if there is a piece that is black, it can move there and not any further                        
                     else if (!board.getBoard().get(row).get(i).isWhite())
@@ -152,7 +156,7 @@ public class Rook extends Piece
                 {
                     // If there is nothing in the way, it can move there
                     if (board.getBoard().get(row).get(i).getPieceType().contains("Empty"))
-                        potentialMoves.add(i + "," + column);
+                        potentialMoves.add(row + "," + i);
 
                     // Else if there is a piece that is white, it can move there and not any further                        
                     else if (board.getBoard().get(row).get(i).isWhite())
@@ -194,7 +198,7 @@ public class Rook extends Piece
                 {
                     // If there is nothing in the way, it can move there
                     if (board.getBoard().get(row).get(i).getPieceType().contains("Empty"))
-                        potentialMoves.add(i + "," + column);
+                        potentialMoves.add(row + "," + i);
 
                     // Else if there is a piece that is white, it can move there and not any further                        
                     else if (board.getBoard().get(row).get(i).isWhite())
@@ -215,5 +219,25 @@ public class Rook extends Piece
 
         // Something bad happens
         return null;
+    }
+    
+    public boolean getHasMoved()
+    {
+        return hasMoved;
+    }
+    
+    // If a rook has moved, it needs to set hasMoved to true for castle logic
+    @Override
+    public void setRow(int row)
+    {
+        hasMoved = true;
+        this.row = row;      
+    }
+    
+    @Override
+    public void setColumn(int column)
+    {
+        hasMoved = true;
+        this.col = column;
     }
 }

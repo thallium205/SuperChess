@@ -86,7 +86,7 @@ public class Queen extends Piece
                 {                    
                     // If there is nothing in the way, it can move there
                     if (board.getBoard().get(row).get(i).getPieceType().contains("Empty"))
-                        potentialMoves.add(i + "," + column);
+                        potentialMoves.add(row + "," + i);
 
                     // Else if there is a piece that is black, it can move there and not any further                        
                     else if (!board.getBoard().get(row).get(i).isWhite())
@@ -149,7 +149,7 @@ public class Queen extends Piece
             
             // Move SOUTH-WEST
             j = column - 1;
-            for (int i = row + 1; i < 0; i++)
+            for (int i = row + 1; i < 8; i++)
             {                  
                 // If there is nothing in the way, it can move there
                 if (j >= 0 && board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
@@ -180,7 +180,7 @@ public class Queen extends Piece
                 {
                     // If there is nothing in the way, it can move there
                     if (board.getBoard().get(row).get(i).getPieceType().contains("Empty"))
-                        potentialMoves.add(i + "," + column);
+                        potentialMoves.add(row + "," + i);
 
                     // Else if there is a piece that is black, it can move there and not any further                        
                     else if (!board.getBoard().get(row).get(i).isWhite())
@@ -283,7 +283,7 @@ public class Queen extends Piece
                 {
                     // If there is nothing in the way, it can move there
                     if (board.getBoard().get(row).get(i).getPieceType().contains("Empty"))
-                        potentialMoves.add(i + "," + column);
+                        potentialMoves.add(row + "," + i);
 
                     // Else if there is a piece that is white, it can move there and not any further                        
                     else if (board.getBoard().get(row).get(i).isWhite())
@@ -346,7 +346,7 @@ public class Queen extends Piece
             
             // Move SOUTH-WEST
             j = column - 1;
-            for (int i = row + 1; i < 0; i++)
+            for (int i = row + 1; i < 8; i++)
             {      
                 // If there is nothing in the way, it can move there
                 if (j >= 0 && board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
@@ -376,7 +376,7 @@ public class Queen extends Piece
                 {
                     // If there is nothing in the way, it can move there
                     if (board.getBoard().get(row).get(i).getPieceType().contains("Empty"))
-                        potentialMoves.add(i + "," + column);
+                        potentialMoves.add(row + "," + i);
 
                     // Else if there is a piece that is white, it can move there and not any further                        
                     else if (board.getBoard().get(row).get(i).isWhite())

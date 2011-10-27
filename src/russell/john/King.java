@@ -7,7 +7,14 @@ import java.util.LinkedList;
 
 public class King extends Piece
 {       
-    Piece originalPiece;
+    Piece originalPiece, replacedPiece;
+    
+    public static final String CastleKing = "CastleKing";
+    public static final String CastleQueen = "CastleQueen";
+    
+    // Used for determinging if castling is allowed
+    private Boolean hasMoved;
+    
     public King()
     {
     
@@ -23,6 +30,7 @@ public class King extends Piece
        this.piece = this.assetManager.loadModel("Models/King.j3o");  
        this.piece.setName("King," + this.isWhite + "," + this.row + "," + this.col);
        this.pieceType = "King";
+       this.hasMoved = false;
     }
     
     public ArrayList<String> getPotentialMoves(BoardType board)
@@ -41,9 +49,8 @@ public class King extends Piece
             
             // A king can move NORTH-EAST if either nothing is in front of it or there is an enemy piece
             if (row != 0 && column != 7)            
-                if (board.getBoard().get(row - 1).get(column + 1).getPieceType().contains("Empty") || !board.getBoard().get(row - 1).get(column + 1).isWhite);
-                    potentialMoves.add((row - 1) + "," + (column + 1));
-            
+                if (board.getBoard().get(row - 1).get(column + 1).getPieceType().contains("Empty") || !board.getBoard().get(row - 1).get(column + 1).isWhite)
+                    potentialMoves.add((row - 1) + "," + (column + 1));            
             
             // A king can move EAST if either nothing is in front of it or there is an enemy piece
             if (column != 7)            
@@ -52,7 +59,7 @@ public class King extends Piece
             
             // A king can move SOUTH-EAST if either nothing is in front of it or there is an enemy piece
             if (row != 7 && column != 7)            
-                if (board.getBoard().get(row + 1).get(column + 1).getPieceType().contains("Empty") || !board.getBoard().get(row + 1).get(column + 1).isWhite);
+                if (board.getBoard().get(row + 1).get(column + 1).getPieceType().contains("Empty") || !board.getBoard().get(row + 1).get(column + 1).isWhite)
                     potentialMoves.add((row + 1) + "," + (column + 1));             
             
             // A king can move SOUTH if either nothing is in front of it or there is an enemy piece
@@ -62,19 +69,85 @@ public class King extends Piece
             
             // A king can move SOUTH-WEST if either nothing is in front of it or there is an enemy piece
             if (row != 7 && column != 0)            
-                if (board.getBoard().get(row + 1).get(column - 1).getPieceType().contains("Empty") || !board.getBoard().get(row + 1).get(column - 1).isWhite);
+                if (board.getBoard().get(row + 1).get(column - 1).getPieceType().contains("Empty") || !board.getBoard().get(row + 1).get(column - 1).isWhite)
                     potentialMoves.add((row + 1) + "," + (column - 1));             
             
            // A king can move WEST if either nothing is in front of it or there is an enemy piece
             if (column != 0)            
                 if (board.getBoard().get(row).get(column - 1).getPieceType().contains("Empty") || !board.getBoard().get(row).get(column - 1).isWhite)
-                    potentialMoves.add((row - 1) + "," + (column + 1));             
+                    potentialMoves.add((row) + "," + (column - 1));             
             
             // A king can move NORTH-WEST if either nothing is in front of it or there is an enemy piece
             if (row != 0 && column != 0)            
-                if (board.getBoard().get(row - 1).get(column - 1).getPieceType().contains("Empty") || !board.getBoard().get(row - 1).get(column - 1).isWhite);
+                if (board.getBoard().get(row - 1).get(column - 1).getPieceType().contains("Empty") || !board.getBoard().get(row - 1).get(column - 1).isWhite)
                     potentialMoves.add((row - 1) + "," + (column - 1));
             
+            // Castling - A king can castle if 
+            // 1) it hasnt moved yet. 
+            // 2) if it is not in check. 
+            // 3) there are no pieces in its way 
+            // 4) a rook exists and that it hasn't moved yet
+            if (this.isWhite)
+            {
+                // The king cannot have moved yet
+                if (!this.hasMoved)
+                {
+                    // The king cannot be in check at the moment
+                    if (!isThereAThreat(board, (this.row + "" + this.col), this.row, this.col))
+                    {
+                        // To caste king's side for white, there cannot be a bishop or knight in the way
+                        if (board.getBoard().get(7).get(5).getPieceType().contains("Empty") && board.getBoard().get(7).get(6).getPieceType().contains("Empty"))
+                        {
+                            // There must be a rook at the edge and it cannot have moved yet either
+                            if (board.getBoard().get(7).get(7).getPieceType().contains("Rook") && !((Rook) board.getBoard().get(7).get(7)).getHasMoved())
+                            {
+                                potentialMoves.add(CastleKing);
+                            }
+                        }
+                        
+                        // To caslte queen's side for white, there cannot be a queen, bishop, or knight in the way
+                        else if (board.getBoard().get(7).get(3).getPieceType().contains("Empty") && board.getBoard().get(7).get(2).getPieceType().contains("Empty") && board.getBoard().get(7).get(1).getPieceType().contains("Empty"))
+                        {
+                           // There must be a rook at the edge and it cannot have moved yet either
+                            if (board.getBoard().get(7).get(0).getPieceType().contains("Rook") && !((Rook) board.getBoard().get(7).get(0)).getHasMoved())
+                            {
+                                potentialMoves.add(CastleQueen);
+                            }
+                        }                       
+                    }
+                }
+            }
+            
+            else if (!this.isWhite)
+            {
+                // The king cannot have moved yet
+                if (!this.hasMoved)
+                {
+                    // The king cannot be in check at the moment
+                    if (!isThereAThreat(board, (this.row + "" + this.col), this.row, this.col))
+                    {
+                        // To caste king's side for black, there cannot be a bishop or knight in the way
+                        if (board.getBoard().get(0).get(5).getPieceType().contains("Empty") && board.getBoard().get(0).get(6).getPieceType().contains("Empty"))
+                        {
+                            // There must be a rook at the edge and it cannot have moved yet either
+                            if (board.getBoard().get(0).get(7).getPieceType().contains("Rook") && !((Rook) board.getBoard().get(0).get(7)).getHasMoved())
+                            {
+                                potentialMoves.add(CastleKing);
+                            }
+                        }
+                        
+                        // To caslte queen's side for black, there cannot be a queen, bishop, or knight in the way
+                        else if (board.getBoard().get(0).get(3).getPieceType().contains("Empty") && board.getBoard().get(0).get(2).getPieceType().contains("Empty") && board.getBoard().get(0).get(1).getPieceType().contains("Empty"))
+                        {
+                           // There must be a rook at the edge and it cannot have moved yet either
+                            if (board.getBoard().get(0).get(0).getPieceType().contains("Rook") && !((Rook) board.getBoard().get(0).get(0)).getHasMoved())
+                            {
+                                potentialMoves.add(CastleQueen);
+                            }
+                        }                       
+                    }                            
+                }
+            }          
             
            return removeIllegalMoves(row, column, potentialMoves, board);         
         }
@@ -95,11 +168,9 @@ public class King extends Piece
                     potentialMoves.add((row - 1) + "," + (column + 1));              
             
             // A king can move EAST if either nothing is in front of it or there is an enemy piece
-            if (column != 7)  
-            {
+            if (column != 7)              
                 if (board.getBoard().get(row).get(column + 1).getPieceType().contains("Empty") || board.getBoard().get(row).get(column + 1).isWhite)
-                    potentialMoves.add(row + "," + (column + 1)); 
-            }
+                    potentialMoves.add(row + "," + (column + 1));             
             
             // A king can move SOUTH-EAST if either nothing is in front of it or there is an enemy piece
             if (row != 7 && column != 7)            
@@ -119,7 +190,7 @@ public class King extends Piece
            // A king can move WEST if either nothing is in front of it or there is an enemy piece
             if (column != 0)            
                 if (board.getBoard().get(row).get(column - 1).getPieceType().contains("Empty") || board.getBoard().get(row).get(column - 1).isWhite)
-                    potentialMoves.add((row - 1) + "," + (column + 1));             
+                    potentialMoves.add((row) + "," + (column - 1));             
             
             // A king can move NORTH-WEST if either nothing is in front of it or there is an enemy piece
             if (row != 0 && column != 0)            
@@ -148,19 +219,24 @@ public class King extends Piece
         for (Iterator iter = tmpLinkedList.iterator(); iter.hasNext();)
         {
             String move = (String) iter.next();
-            int newPieceRow = Integer.parseInt((move).split(",")[0]);
-            int newPieceColumn = Integer.parseInt((move).split(",")[1]);      
             
-            // We get a board structure of what it might potentially look like given the potential moves
-            potentialMove(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);    
-            
-            // Now we evaluate the king's predicamate given this new board structure.  
-            // If there is a problem with it, will will remove this current potential move from the potentialMoves array list+
-            // TODO - if the king itself is moving, getPotentialMoves may need to overload this somehow.. ill cross that when i get there
-            if(isThereAThreat(board, move, this.row, this.col))
-                iter.remove();           
-            
-            potentialMoveBack(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);   
+            // Castling logic called isThereAThreat directly, so ignore this
+            if (!move.contains(CastleKing) || !move.contains(CastleQueen))
+            {                
+                int newPieceRow = Integer.parseInt((move).split(",")[0]);
+                int newPieceColumn = Integer.parseInt((move).split(",")[1]);      
+
+                // We get a board structure of what it might potentially look like given the potential moves
+                potentialMove(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);    
+
+                // Now we evaluate the king's predicamate given this new board structure.  
+                // If there is a problem with it, will will remove this current potential move from the potentialMoves array list+
+                // TODO - if the king itself is moving, getPotentialMoves may need to overload this somehow.. ill cross that when i get there
+                if(isThereAThreat(board, move, this.row, this.col))
+                    iter.remove();           
+
+                potentialMoveBack(board, currentPieceRow, currentPieceColumn, newPieceRow, newPieceColumn);   
+            }
         }
         
         potentialMoves.clear();
@@ -199,32 +275,47 @@ public class King extends Piece
         // we get the piece in the original location
         originalPiece = board.getBoard().get(currentRow).get(currentColumn);
         
-        // we then replace it with an empty square
-        // TODO - What about castling??  A separate function will have to be made to handle that
-        board.getBoard().get(currentRow).set(currentColumn, board.getBoard().get(newRow).get(newColumn));
+        // We get the piece in the new location 
+        replacedPiece = board.getBoard().get(newRow).get(newColumn);
         
-        // we now replace the new position with the current piece
+        // we then replace the old positiion with an empty square
+        // TODO - What about castling??  A separate function will have to be made to handle that
+        // -> this wont work! board.getBoard().get(currentRow).set(currentColumn, board.getBoard().get(newRow).get(newColumn));      
+        board.getBoard().get(currentRow).set(currentColumn, new Empty(assetManager, true, currentRow, currentColumn));
+        
+        // we now replace the new position with the original piece
         board.getBoard().get(newRow).set(newColumn, originalPiece);             
     }
     
     private void potentialMoveBack(BoardType board, int currentRow, int currentColumn, int newRow, int newColumn)
     {
-        // Time to move the piece back
+        // Time to move the pieces back
+        board.getBoard().get(currentRow).set(currentColumn, originalPiece);
+        board.getBoard().get(newRow).set(newColumn, replacedPiece);
+        
+        /*
         Piece newPiece = board.getBoard().get(currentRow).get(currentColumn);
         
         // Replace the current with an empty 
         board.getBoard().get(currentRow).set(currentColumn, originalPiece);
         
         // Put the piece back
-        board.getBoard().get(newRow).set(newColumn, newPiece);
+        */
         
     }
     
     private boolean isThereAThreat(BoardType board, String move, int kingRow, int kingCol)
-    {
+    {       
         int moveRow = Integer.parseInt(move.split(",")[0]);
         int moveCol = Integer.parseInt(move.split(",")[1]);    
         int pawnRow, pawnCol, knightRow, knightCol, j;
+        
+        // If the king is wanting to move itself, then the moveRow and the moveCol become the kingRow and the kingCol
+        if (originalPiece.getPieceType().contains("King"))
+        {
+            kingRow = moveRow;
+            kingCol = moveCol;
+        }
         
         // We are going to check all the immediate pieces surrounding the king
         
@@ -262,24 +353,19 @@ public class King extends Piece
         pawnCol = kingCol + 1;
         if (pawnRow >= 0 && pawnRow <= 7 && pawnCol >= 0 && pawnCol <=7)
         {
-            if (board.getBoard().get(pawnRow).get(pawnCol).getPieceType().contains("Pawn"))
+            // THe pawn has to be black and the king has to be white for this to be a threat!
+            if (board.getBoard().get(pawnRow).get(pawnCol).getPieceType().contains("Pawn") && !board.getBoard().get(pawnRow).get(pawnCol).isWhite())
             {
                 if (this.isWhite)
                 {
-                    if (!board.getBoard().get(pawnRow).get(pawnCol).isWhite())
-                        return true;
-                }
-                else if (!this.isWhite)
-                {
-                    if (board.getBoard().get(pawnRow).get(pawnCol).isWhite())
-                        return true;
+                    return true;
                 }
             }
         }
         
         // Check for bishops and queens     
         j = kingCol + 1;
-        for (int i = kingRow - 1; i > 0; i--)
+        for (int i = kingRow - 1; i >= 0; i--)
         {      
             // We only care about the closest non-empty diagonal piece to the king
             if (j <=7 && !board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
@@ -340,20 +426,16 @@ public class King extends Piece
         pawnCol = kingCol + 1;
         if (pawnRow >= 0 && pawnRow <= 7 && pawnCol >= 0 && pawnCol <=7)
         {
-            if (board.getBoard().get(pawnRow).get(pawnCol).getPieceType().contains("Pawn"))
+            // The pawn has to be white and the king has to be black for this to be a threat
+            if (board.getBoard().get(pawnRow).get(pawnCol).getPieceType().contains("Pawn") && board.getBoard().get(pawnRow).get(pawnCol).isWhite())
             {
-                if (this.isWhite)
+                if (!this.isWhite)
                 {
-                    if (!board.getBoard().get(pawnRow).get(pawnCol).isWhite())
-                        return true;
-                }
-                else if (!this.isWhite)
-                {
-                    if (board.getBoard().get(pawnRow).get(pawnCol).isWhite())
-                        return true;
+                    return true;
                 }
             }
         }
+        
         
         // Check for bishops and queens    
         j = kingCol + 1;
@@ -417,24 +499,19 @@ public class King extends Piece
         pawnCol = kingCol - 1;
         if (pawnRow >= 0 && pawnRow <= 7 && pawnCol >= 0 && pawnCol <=7)
         {
-            if (board.getBoard().get(pawnRow).get(pawnCol).getPieceType().contains("Pawn"))
+            // The pawn has to be white and the king has to be black for this to be a threat
+            if (board.getBoard().get(pawnRow).get(pawnCol).getPieceType().contains("Pawn") && board.getBoard().get(pawnRow).get(pawnCol).isWhite())
             {
-                if (this.isWhite)
+                if (!this.isWhite)
                 {
-                    if (!board.getBoard().get(pawnRow).get(pawnCol).isWhite())
-                        return true;
-                }
-                else if (!this.isWhite)
-                {
-                    if (board.getBoard().get(pawnRow).get(pawnCol).isWhite())
-                        return true;
+                    return true;
                 }
             }
         }
         
         // Check for bishops and queens      
         j = kingCol - 1;
-        for (int i = kingRow + 1; i < 0; i++)
+        for (int i = kingRow + 1; i < 8; i++)
         {           
             // We only care about the closest non-empty diagonal piece to the king
             if (j >= 0 && !board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
@@ -462,7 +539,7 @@ public class King extends Piece
         }
         
         // ********** Get all squares WEST where the last square is either the edge of the board or an enemy piece **********
-        for (int i = kingCol - 1; i > 0; i--)
+        for (int i = kingCol - 1; i >= 0; i--)
         {
             // We only care about the closest piece to the king
             if (!board.getBoard().get(kingRow).get(i).getPieceType().contains("Empty"))
@@ -494,24 +571,19 @@ public class King extends Piece
         pawnCol = kingCol - 1;
         if (pawnRow >= 0 && pawnRow <= 7 && pawnCol >= 0 && pawnCol <=7)
         {
-            if (board.getBoard().get(pawnRow).get(pawnCol).getPieceType().contains("Pawn"))
+            // The pawn has to be black and the king has to be white for this to be a threat!
+            if (board.getBoard().get(pawnRow).get(pawnCol).getPieceType().contains("Pawn") && !board.getBoard().get(pawnRow).get(pawnCol).isWhite())
             {
                 if (this.isWhite)
                 {
-                    if (!board.getBoard().get(pawnRow).get(pawnCol).isWhite())
-                        return true;
-                }
-                else if (!this.isWhite)
-                {
-                    if (board.getBoard().get(pawnRow).get(pawnCol).isWhite())
-                        return true;
+                    return true;
                 }
             }
         }
         
         // Check for bishops and queens  
         j = kingCol - 1;
-        for (int i = kingRow - 1; i > 0; i--)
+        for (int i = kingRow - 1; i >= 0; i--)
         {
             // We only care about the closest non-empty diagonal piece to the king
             if (j >= 0 && !board.getBoard().get(i).get(j).getPieceType().contains("Empty"))
@@ -734,4 +806,19 @@ public class King extends Piece
         // there are no threats to the king given this particular move
         return false;        
     }   
+    
+    // If a king has moved, it needs to set hasMoved to true for castle logic
+    @Override
+    public void setRow(int row)
+    {
+        hasMoved = true;
+        this.row = row;      
+    }
+    
+    @Override
+    public void setColumn(int column)
+    {
+        hasMoved = true;
+        this.col = column;
+    }
 }
