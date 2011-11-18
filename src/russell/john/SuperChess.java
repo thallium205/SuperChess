@@ -8,6 +8,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 
@@ -17,6 +18,10 @@ public class SuperChess extends SimpleApplication
     Vector3f rotateVector = new Vector3f(0,1f,1f);
     PointLight light;
     Nifty nifty;
+    
+    // For piece rotation
+    private static boolean rotatePiece = false;
+    private static Piece rotatingPiece;
 
     public static void main(String[] args) 
     {
@@ -46,15 +51,26 @@ public class SuperChess extends SimpleApplication
 
     @Override
     public void simpleUpdate(float tpf) 
-    {
-        // rotate.fromAngleAxis(FastMath.HALF_PI * (tpf/9f), rotateVector);
-        // boardNode.rotate(rotate);
+    {        
+        if (rotatePiece)
+            rotatingPiece.getSpatial().rotate(0, tpf, -1*tpf);
     }
 
     @Override
     public void simpleRender(RenderManager rm) 
     {
         //TODO: add render code
+    }
+    
+    public static void beginRotatePiece(Piece piece)
+    {
+        rotatePiece = true;
+        rotatingPiece = piece;
+    }
+    
+    public static void stopRotatePiece()
+    {
+        rotatePiece = false;
     }
     
     
@@ -104,6 +120,6 @@ public class SuperChess extends SimpleApplication
         rootNode.attachChild(boardNode); // put this node in the scene
                
         // Instantiate Board object and pass in the node and asset manager
-        Board board = new Board(boardNode, assetManager, inputManager, cam, nifty);  
+        Board board = new Board(boardNode, assetManager, inputManager, cam, nifty, viewPort);  
     }    
 }

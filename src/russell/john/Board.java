@@ -12,7 +12,10 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
 import com.jme3.renderer.Camera;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node; 
 import com.jme3.scene.Spatial;
@@ -22,22 +25,24 @@ public class Board
 {
     Node boardNode;
     public static AssetManager assetManager;
-    Material whiteMaterial, blackMaterial, boardMaterial, emptyMaterial, selectedPieceMaterial, suggestedMovementMaterial;
+    Material whiteMaterial, blackMaterial, boardMaterial, emptyMaterial, selectedPieceMaterial, suggestedMovementMaterial, suggestedEnemyPieceMove;
     InputManager inputManager;
     Camera camera;
     BoardControls boardControls;
     Nifty nifty;
+    ViewPort viewPort;
     
     
     
     
-    public Board (Node boardNode, AssetManager assetManager, InputManager inputManager, Camera camera, Nifty nifty)
+    public Board (Node boardNode, AssetManager assetManager, InputManager inputManager, Camera camera, Nifty nifty, ViewPort viewPort)
     {
         this.boardNode = boardNode;
         this.assetManager = assetManager;
         this.inputManager = inputManager;
         this.camera = camera;
         this.nifty = nifty;
+        this.viewPort = viewPort;
         
         // Set Materials
         buildMaterials();
@@ -73,14 +78,18 @@ public class Board
         selectedPieceMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         selectedPieceMaterial.setColor("Color", ColorRGBA.Green);
         selectedPieceMaterial.setColor("GlowColor", ColorRGBA.Green);
-       // FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-       // BloomFilter bloom= new BloomFilter(BloomFilter.GlowMode.Objects);        
-       // fpp.addFilter(bloom);
-       // viewPort.addProcessor(fpp);
+        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+        BloomFilter bloom= new BloomFilter(BloomFilter.GlowMode.Objects);        
+        fpp.addFilter(bloom);
+        viewPort.addProcessor(fpp);
         
         suggestedMovementMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        suggestedMovementMaterial.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
-        suggestedMovementMaterial.setColor("Color", ColorRGBA.BlackNoAlpha);
+        // suggestedMovementMaterial.getAdditionalRenderState().setBlendMode(BlendMode.Alpha);
+        // suggestedMovementMaterial.setColor("Color", ColorRGBA.BlackNoAlpha);
+        suggestedMovementMaterial.setColor("Color", ColorRGBA.Blue);
+        
+        suggestedEnemyPieceMove = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        suggestedEnemyPieceMove.setColor("Color", ColorRGBA.Red);
         
     }
     
@@ -93,7 +102,7 @@ public class Board
     
     private void setBoard()
     {  
-        boardControls = new BoardControls(assetManager, boardNode, emptyMaterial, whiteMaterial, blackMaterial, selectedPieceMaterial, suggestedMovementMaterial);
+        boardControls = new BoardControls(assetManager, boardNode, emptyMaterial, whiteMaterial, blackMaterial, selectedPieceMaterial, suggestedMovementMaterial, suggestedEnemyPieceMove);
         boardControls.setBoard();       
     }     
     

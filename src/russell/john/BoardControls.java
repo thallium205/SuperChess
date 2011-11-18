@@ -7,18 +7,19 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import java.util.ArrayList;
+import javax.vecmath.Vector3d;
 
 public class BoardControls 
 {
     
     AssetManager assetManager;
     Node boardNode;
-    Material whiteMaterial, blackMaterial, boardMaterial, emptyMaterial, selectedPieceMaterial, suggestedMovementMaterial;
-    BoardType board;
-    
+    Material whiteMaterial, blackMaterial, boardMaterial, emptyMaterial, selectedPieceMaterial, suggestedMovementMaterial, suggestedEnemyPieceMove;
+    BoardType board;    
     ArrayList<String> selectedPotentialMoves;
     Piece selectedPiece;
     Boolean selected = false;
+    Boolean isWhiteTurn = true;
     
     
     
@@ -26,7 +27,7 @@ public class BoardControls
     /**
      * Initializes the board by setting all pieces to blank
      */
-    public BoardControls(AssetManager assetManager, Node boardNode, Material emptyMaterial, Material whiteMaterial, Material blackMaterial, Material selectedPieceMaterial, Material suggestedMovementMaterial)
+    public BoardControls(AssetManager assetManager, Node boardNode, Material emptyMaterial, Material whiteMaterial, Material blackMaterial, Material selectedPieceMaterial, Material suggestedMovementMaterial, Material suggestedEnemyPieceMove)
     {
         this.assetManager = assetManager;
         this.boardNode = boardNode;
@@ -35,6 +36,7 @@ public class BoardControls
         this.blackMaterial = blackMaterial;
         this.selectedPieceMaterial = selectedPieceMaterial;
         this.suggestedMovementMaterial = suggestedMovementMaterial;
+        this.suggestedEnemyPieceMove = suggestedEnemyPieceMove;
         board = new BoardType();
     }
     
@@ -55,31 +57,34 @@ public class BoardControls
                 if(isInPotentialMoveSet(name))
                 {
                     Piece destinationPiece = board.getPiece(name);
-                    // if it is, move it!
                     
-                    // Check to see if its a king move
-                    if (selectedPiece.getPieceType().contains("King"))
-                    {
-                        // more logic needed!!!  TODO
-                        // If the move piece is 2 spaces to its right, its a castle kingside
-                        if (destinationPiece.getColumn() == selectedPiece.getColumn() + 2)                        
-                            castleMove(selectedPiece, destinationPiece);
-                        
-                        // If the move piece is 2 spaces to its left, its a castle queenside
-                        else if (destinationPiece.getColumn() == selectedPiece.getColumn() - 2)                        
-                            castleMove(selectedPiece, destinationPiece);    
-                        
-                        // It's a normal king move
-                        else 
-                            move(selectedPiece, destinationPiece);                        
-                    }
-                    
-                    // If its not a king move
-                    else
-                        move(selectedPiece, destinationPiece);                    
-                    
-                    // No longer selected
-                    selected = false;
+                    // We need to check to see if the piece that is their turn or not
+                   // if ((destinationPiece.isWhite  && isWhiteTurn) || (!destinationPiece.isWhite && !isWhiteTurn))
+                   // {         
+                        // if it is, move it!                    
+                        // Check to see if its a king move
+                        if (selectedPiece.getPieceType().contains("King"))
+                        {
+                            // If the move piece is 2 spaces to its right, its a castle kingside
+                            if (destinationPiece.getColumn() == selectedPiece.getColumn() + 2)                        
+                                castleMove(selectedPiece, destinationPiece);
+
+                            // If the move piece is 2 spaces to its left, its a castle queenside
+                            else if (destinationPiece.getColumn() == selectedPiece.getColumn() - 2)                        
+                                castleMove(selectedPiece, destinationPiece);    
+
+                            // It's a normal king move
+                            else 
+                                move(selectedPiece, destinationPiece);                        
+                        }
+
+                        // If its not a king move
+                        else
+                            move(selectedPiece, destinationPiece);                    
+
+                        // No longer selected
+                        selected = false;
+                  //  }
                 }
                 
                 // If it is not, we will assume the user is selecting a different piece other than what is in the move set!
@@ -89,10 +94,10 @@ public class BoardControls
                     // Select the new piece if it is not an empty                
                     if (!selectedPiece.getPieceType().contains("Empty"))
                     {
-                        selectedPiece.getSpatial().setMaterial(selectedPieceMaterial);
+                        enablePieceEffect(selectedPiece);
                         
                         // sets selectedPotentialMoves
-                        getLegalMoves(selectedPiece);
+                        getLegalMoves(selectedPiece, true);
                         
                         // Set this piece to selected
                         selected = true;  
@@ -105,15 +110,18 @@ public class BoardControls
             {
                 // Select the new piece if it is not an empty
                 selectedPiece = board.getPiece(name);
-                System.out.println(selectedPiece.getPieceType() + " " + selectedPiece.getRow() + "," + selectedPiece.getColumn());
-                if (!selectedPiece.getPieceType().contains("Empty"))
+                
+                // We need to check to see if the piece that is their turn or not
+                if ((selectedPiece.isWhite  && isWhiteTurn) || (!selectedPiece.isWhite && !isWhiteTurn))
                 {
-                    selectedPiece.getSpatial().setMaterial(selectedPieceMaterial);  
-                    
-                    // sets selectedPotentialMoves
-                    getLegalMoves(selectedPiece);
-                    
-                    selected = true;
+                    if (!selectedPiece.getPieceType().contains("Empty"))
+                    {
+                        enablePieceEffect(selectedPiece);                        
+
+                        // sets selectedPotentialMoves
+                        getLegalMoves(selectedPiece, true);
+                        selected = true;
+                    }
                 }
             }    
        }
@@ -134,7 +142,9 @@ public class BoardControls
         return false;
     }
     
-    private void getLegalMoves(Piece piece)
+    // Will determine the legal move set of a piece and if highlight moves is true,
+    // draw the moves to the board.
+    private void getLegalMoves(Piece piece, boolean highlightMoves)
     {        
         selectedPotentialMoves = new ArrayList<String>();
         int row, col;        
@@ -143,25 +153,18 @@ public class BoardControls
         {                     
             Pawn pawn = (Pawn) piece;
             selectedPotentialMoves = pawn.getPotentialMoves(board);
-            for (int i = 0; i < selectedPotentialMoves.size(); i++)
-            {
-                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
-                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
-            }
-                          
+            
+            if (highlightMoves)            
+                selectPotentialMoves();                          
         }
         
         else if (piece.getPieceType().contains("Rook"))
         {
             Rook rook = (Rook) piece;
             selectedPotentialMoves = rook.getPotentialMoves(board);
-            for (int i = 0; i < selectedPotentialMoves.size(); i++)
-            {
-                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
-                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
-            }
+            
+            if (highlightMoves)   
+                selectPotentialMoves();
             
         }
         
@@ -169,12 +172,9 @@ public class BoardControls
         {
             Knight knight = (Knight) piece;
             selectedPotentialMoves = knight.getPotentialMoves(board);
-            for (int i = 0; i < selectedPotentialMoves.size(); i++)
-            {
-                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
-                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
-            } 
+            
+            if (highlightMoves)   
+                selectPotentialMoves();
             
         }
         
@@ -182,24 +182,18 @@ public class BoardControls
         {
             Bishop bishop = (Bishop) piece;
             selectedPotentialMoves = bishop.getPotentialMoves(board);
-            for (int i = 0; i < selectedPotentialMoves.size(); i++)
-            {
-                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
-                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
-            }           
+            
+            if (highlightMoves)   
+                selectPotentialMoves();         
         }
         
         else if (piece.getPieceType().contains("Queen"))
         {
             Queen queen = (Queen) piece;
             selectedPotentialMoves = queen.getPotentialMoves(board);
-            for (int i = 0; i < selectedPotentialMoves.size(); i++)
-            {
-                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
-                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
-            }
+            
+            if (highlightMoves)   
+                selectPotentialMoves();
             
         }
         
@@ -207,12 +201,9 @@ public class BoardControls
         {
             King king = (King) piece;
             selectedPotentialMoves = king.getPotentialMoves(board);
-            for (int i = 0; i < selectedPotentialMoves.size(); i++)
-            {
-                row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
-                col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
-                board.getBoard().get(row).get(col).getSpatial().setMaterial(selectedPieceMaterial);
-            }
+            
+            if (highlightMoves)   
+                selectPotentialMoves();
         }
         
         else
@@ -221,14 +212,25 @@ public class BoardControls
         }
     }
     
+    private void selectPotentialMoves()
+    {
+        int row, col;
+        for (int i = 0; i < selectedPotentialMoves.size(); i++)
+        {
+            row = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[0]);
+            col = Integer.parseInt(selectedPotentialMoves.get(i).split(",")[1]);
+            
+            // Add some effects if a potentialMove contains a piece
+            if (!board.getBoard().get(row).get(col).getPieceType().contains("Empty"))
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(suggestedEnemyPieceMove);
+            else
+                board.getBoard().get(row).get(col).getSpatial().setMaterial(suggestedMovementMaterial);
+        }
+    }
+    
     private void deselectPotentialMoves()
     {
-        if (selectedPiece.isWhite() && !selectedPiece.getPieceType().contains("Empty"))
-            selectedPiece.getSpatial().setMaterial(whiteMaterial);
-        else if (!selectedPiece.isWhite() && !selectedPiece.getPieceType().contains("Empty"))
-            selectedPiece.getSpatial().setMaterial(blackMaterial);
-        else if (selectedPiece.getPieceType().contains("Empty"))
-            selectedPiece.getSpatial().setMaterial(emptyMaterial);
+        disablePieceEffect(selectedPiece);           
         
         int row, col;
         for (int i = 0; i < selectedPotentialMoves.size(); i++)
@@ -277,7 +279,10 @@ public class BoardControls
 
         // Attach the the startPiece with the location of the endPiece to the boardNode
         boardNode.attachChild(board.getBoard().get(endRow).get(endCol).getSpatial());
-        startPiece.getSpatial().setLocalTranslation(BoardConstants.vectors.get(endRow).get(endCol));           
+        startPiece.getSpatial().setLocalTranslation(BoardConstants.vectors.get(endRow).get(endCol)); 
+        
+        // Change the turn to the other player and check for checkmate
+        nextPlayerTurn();
     }
     
     private void castleMove(Piece startPiece, Piece endPiece)
@@ -322,8 +327,126 @@ public class BoardControls
                 Piece destinationKingRookLocation = board.getBoard().get(0).get(3); 
                 move (blackQueensideRook, destinationKingRookLocation);
             }
-        }    
+        }
+        
+        // Change the turn to the other player and check for checkmate
+        nextPlayerTurn();
     }
+    
+    // This function changes the next player's turn and checks for checkmate 
+    private void nextPlayerTurn()
+    {
+        ArrayList<Piece> pieces = new ArrayList<Piece>();
+        boolean checkMate = true;
+                
+        if (isWhiteTurn)
+        {
+            // We are going to iterate through every black piece, checking their possible move sets.
+            // If every piece is unable to move, then it is checkmate.
+            for (int i = 0; i < board.getBoard().size(); i ++)
+            {
+                for (int j = 0; j < board.getBoard().get(i).size(); j++)   
+                {
+                    if (!board.getBoard().get(i).get(j).isWhite())
+                    {
+                        getLegalMoves(board.getBoard().get(i).get(j), false);
+                        if (selectedPotentialMoves.size() > 0)
+                        {
+                            // Black is still able to move.  Not a checkmate.
+                            checkMate = false;
+                            break;
+                        }
+                    }
+                        
+                }
+            }
+            
+            if (checkMate)
+            {
+                // Checkmate!  TODO
+                System.out.println("Black is checkmated!");
+            }
+            
+            else
+            {
+                // It is now black's turn
+                isWhiteTurn = false;
+            }    
+        }
+        
+        else if (!isWhiteTurn)
+        {
+            // We are going to iterate through every white piece, checking their possible move sets.
+            // If every piece is unable to move, then it is checkmate.
+            for (int i = 0; i < board.getBoard().size(); i ++)
+            {
+                for (int j = 0; j < board.getBoard().get(i).size(); j++)   
+                {
+                    if (board.getBoard().get(i).get(j).isWhite())
+                    {
+                        getLegalMoves(board.getBoard().get(i).get(j), false);
+                        if (selectedPotentialMoves.size() > 0)
+                        {
+                            // Black is still able to move.  Not a checkmate.
+                            checkMate = false;
+                            break;
+                        }
+                    }                        
+                }
+            }
+            
+            if (checkMate)
+            {
+                // Checkmate!  TODO
+                System.out.println("White is checkmated!");
+            }
+            
+            else
+            {
+                // It is now black's turn
+                isWhiteTurn = true;
+            }    
+        }      
+    }
+    
+    private void enablePieceEffect(Piece piece)
+    {
+        Vector3f localTranslation;
+        
+        // We are going to set the piece's selected material
+        piece.getSpatial().setMaterial(selectedPieceMaterial);          
+        
+        // We are going to lift the piece into the air
+        localTranslation = piece.getSpatial().getLocalTranslation();
+        localTranslation.setY(5f);
+        piece.getSpatial().setLocalTranslation(localTranslation);
+        
+        // We are going to rotate it in the air
+        SuperChess.beginRotatePiece(piece);
+    }
+    
+    private void disablePieceEffect(Piece piece)
+    {
+        Vector3f localTranslation;
+        
+        // We are going to set the piece's unselectedMaterial
+        if (piece.isWhite() && !piece.getPieceType().contains("Empty"))
+            piece.getSpatial().setMaterial(whiteMaterial);
+        else if (!piece.isWhite() && !piece.getPieceType().contains("Empty"))
+            piece.getSpatial().setMaterial(blackMaterial);
+        else if (piece.getPieceType().contains("Empty"))
+            piece.getSpatial().setMaterial(emptyMaterial);  
+        
+        // We are going to set the piece back down
+        localTranslation = piece.getSpatial().getLocalTranslation();
+        localTranslation.setY(0.5f);
+        piece.getSpatial().setLocalTranslation(localTranslation);
+        
+        // We are going to stop rotation and set it back to normal
+        SuperChess.stopRotatePiece();
+        piece.getSpatial().rotateUpTo(Vector3f.UNIT_Y);
+    }
+    
     
     public void setBoard()
     {

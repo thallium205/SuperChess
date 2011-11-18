@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 public class Pawn extends Piece
 {       
+    private boolean enPassant;
     public Pawn()
     {
     
@@ -20,6 +21,7 @@ public class Pawn extends Piece
        this.piece = this.assetManager.loadModel("Models/Pawn.j3o");  
        this.piece.setName("Pawn," + this.isWhite + "," + this.row + "," + this.col);
        this.pieceType = "Pawn";
+       this.enPassant = false;
     }   
     
     /**
@@ -35,92 +37,103 @@ public class Pawn extends Piece
         ArrayList<String> potentialMoves = new ArrayList<String>();  
         
         if (this.isWhite)
-        {    
-            int row = this.row;
-            int column = this.col;
-            
-            // A pawn can move forward only if nothing is infront of it
-            if (board.getBoard().get(row - 1).get(column).getPieceType().contains("Empty"))  
-            {
-                // Since there is no piece in front of it, it can move forward
-                potentialMoves.add((row - 1) + "," + column);
+        {         
+            // A white pawn can move NORTH only if nothing is infront of it
+            if (row != 0)
+                if (board.getBoard().get(row - 1).get(col).getPieceType().contains("Empty"))  
+                {
+                    // Since there is no piece in front of it, it can move forward
+                    potentialMoves.add((row - 1) + "," + col);
 
-                // A pawn can move two spaces forward at the starting position if there is nothing 2 spaces in front of it
-                if (row == 6 && board.getBoard().get(row - 2).get(column).getPieceType().contains("Empty"))
-                    potentialMoves.add((row - 2) + "," + column);                           
-            }
+                    // A pawn can move two spaces forward at the starting position if there is nothing 2 spaces in front of it
+                    if (row == 6 && board.getBoard().get(row - 2).get(col).getPieceType().contains("Empty"))
+                    {
+                        // Since this pawn moved two spaces, it needs to alert any enemy pawns EAST and WEST of it that they can perform en passant
+                        // Is there an enemy pawn to the EAST?
+                        if (col != 7)
+                            if (board.getBoard().get(row - 2).get(col + 1).getPieceType().contains("Pawn") && !board.getBoard().get(row - 2).get(col + 1).isWhite)
+                                ((Pawn) board.getBoard().get(row - 2).get(col + 1)).setEnPassant(true);    
+                       
+                        // Is there an emeny pawn to the WEST?
+                        if (col != 0)
+                            if (board.getBoard().get(row - 2).get(col - 1).getPieceType().contains("Pawn") && !board.getBoard().get(row - 2).get(col - 1).isWhite)
+                                ((Pawn) board.getBoard().get(row - 2).get(col - 1)).setEnPassant(true);  
+                        
+                        // Now just set the potential piece movement
+                        potentialMoves.add((row - 2) + "," + col);   
+                    }                                                
+                }
             
-            // A pawn can move diagonally if there is a black piece diagonally from it            
-            // Can it move left?     
-            int upperLeftRow = row - 1;
-            int upperLeftColumn = column - 1;
-            
-            if (upperLeftRow >= 0 && upperLeftColumn >= 0)
-            {
-                Piece upperLeftPiece = board.getBoard().get(upperLeftRow).get(upperLeftColumn);                 
-                if (!upperLeftPiece.getPieceType().contains("Empty") && !upperLeftPiece.isWhite())            
-                    potentialMoves.add(upperLeftRow + "," + upperLeftColumn);
-            }
-            
-            // Can it move right?
-            int upperRightRow = row - 1;
-            int upperRightColumn = column + 1;
-            
-            if (upperRightRow <= 7 && upperRightColumn <= 7)
-            {
-                Piece upperRightPiece = board.getBoard().get(upperRightRow).get(upperRightColumn);
-                if (!upperRightPiece.getPieceType().contains("Empty") && !upperRightPiece.isWhite())            
-                    potentialMoves.add(upperRightRow + "," + upperRightColumn);
-            }   
-            
-            return board.getKing(true).removeIllegalMoves(row, column, potentialMoves, board);
+            // A white pawn can move NORTH-WEST if there is a black piece diagonally from it       
+            if (row != 0 && col != 0)                        
+                if (!board.getBoard().get(row - 1).get(col - 1).getPieceType().contains("Empty") && !board.getBoard().get(row - 1).get(col - 1).isWhite())            
+                    potentialMoves.add((row - 1) + "," + (col - 1));
             
             
+            // Can it move NORTH-EAST?            
+            if (row != 0 && col != 7)      
+                if (!board.getBoard().get(row - 1).get(col + 1).getPieceType().contains("Empty") && !board.getBoard().get(row - 1).get(col + 1).isWhite())            
+                    potentialMoves.add((row - 1) + "," + (col + 1));             
+            
+            return board.getKing(true).removeIllegalMoves(row, col, potentialMoves, board);                        
         }
         
         else if (!this.isWhite)
-        {
-            int row = this.row;
-            int column = this.col; 
-            
-            // A pawn can move forward only if nothing is infront of it
-            if (board.getBoard().get(row + 1).get(column).getPieceType().contains("Empty"))  
-            {
-                // Since there is no piece in front of it, it can move forward
-                potentialMoves.add((row + 1) + "," + column);
+        {            
+            // A black pawn can move SOUTH only if nothing is infront of it
+            if (row != 7)
+                if (board.getBoard().get(row + 1).get(col).getPieceType().contains("Empty"))  
+                {
+                    // Since there is no piece in front of it, it can move forward
+                    potentialMoves.add((row + 1) + "," + col);
 
-                // A pawn can move two spaces forward at the starting position if there is nothing 2 spaces in front of it
-                if (row == 1 && board.getBoard().get(row + 2).get(column).getPieceType().contains("Empty"))
-                    potentialMoves.add((row + 2) + "," + column);                           
-            }
+                    // A pawn can move two spaces SOUTH at the starting position if there is nothing 2 spaces in front of it
+                    if (row == 1 && board.getBoard().get(row + 2).get(col).getPieceType().contains("Empty"))
+                    {
+                        // Since this pawn moved two spaces, it needs to alert any enemy pawns EAST and WEST of it that they can perform en passant
+                        // Is there an enemy pawn to the EAST?
+                        if (col != 7)
+                            if (board.getBoard().get(row + 2).get(col + 1).getPieceType().contains("Pawn") && !board.getBoard().get(row + 2).get(col + 1).isWhite)
+                                ((Pawn) board.getBoard().get(row - 2).get(col + 1)).setEnPassant(true);    
+                       
+                        // Is there an emeny pawn to the WEST?
+                        if (col != 0)
+                            if (board.getBoard().get(row + 2).get(col - 1).getPieceType().contains("Pawn") && !board.getBoard().get(row + 2).get(col - 1).isWhite)
+                                ((Pawn) board.getBoard().get(row + 2).get(col - 1)).setEnPassant(true);  
+                        
+                        potentialMoves.add((row + 2) + "," + col);        
+                    }
+                }
             
             // A pawn can move diagonally if there is a black piece diagonally from it            
-            // Can it move left?     
-            int upperLeftRow = row + 1;
-            int upperLeftColumn = column - 1;
+            // Can it move SOUTH-WEST               
+            if (row != 7 && col != 0)                          
+                if (!board.getBoard().get(row + 1).get(col - 1).getPieceType().contains("Empty") && board.getBoard().get(row + 1).get(col - 1).isWhite())            
+                    potentialMoves.add((row + 1) + "," + (col - 1));            
             
-            if (upperLeftRow >= 0 && upperLeftColumn >= 0)
+            // Can it move SOUTH-EAST?            
+            if (row != 7 && col != 7)      
             {
-                Piece upperLeftPiece = board.getBoard().get(upperLeftRow).get(upperLeftColumn);                 
-                if (!upperLeftPiece.getPieceType().contains("Empty") && !upperLeftPiece.isWhite())            
-                    potentialMoves.add(upperLeftRow + "," + upperLeftColumn);
-            }
-            
-            // Can it move right?
-            int upperRightRow = row + 1;
-            int upperRightColumn = column + 1;
-            
-            if (upperRightRow <= 7 && upperRightColumn <= 7)
-            {
-                Piece upperRightPiece = board.getBoard().get(upperRightRow).get(upperRightColumn);
-                if (!upperRightPiece.getPieceType().contains("Empty") && !upperRightPiece.isWhite())            
-                    potentialMoves.add(upperRightRow + "," + upperRightColumn);
+                if (!board.getBoard().get(row + 1).get(col + 1).getPieceType().contains("Empty") && board.getBoard().get(row + 1).get(col + 1).isWhite())            
+                    potentialMoves.add((row + 1) + "," + (col + 1));
             }   
             
             // Check for placing own king in check!
-            return board.getKing(false).removeIllegalMoves(row, column, potentialMoves, board);
+            return board.getKing(false).removeIllegalMoves(row, col, potentialMoves, board);
             
         }        
         return null;   
     }     
+    
+    public void setEnPassant(Boolean enPassant)
+    {
+        this.enPassant = enPassant;        
+        // A listener needs to be created for this! TODO
+    }
+    
+    public boolean getEnPassant()
+    {
+        return enPassant;
+    }
+    
 }
