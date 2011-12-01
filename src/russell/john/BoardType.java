@@ -45,4 +45,13 @@ public class BoardType
                 }
         return null;  // will never happen
     }
+    
+    public Piece getLastMovedPiece()
+    {
+        for (int i = 0; i < board.size(); i ++)
+            for (int j = 0; j < board.get(i).size(); j++)
+                if (board.get(i).get(j).isLastMoved())
+                    return board.get(i).get(j);
+        return null;
+    }
 }

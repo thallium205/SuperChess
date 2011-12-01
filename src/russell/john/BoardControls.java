@@ -5,31 +5,37 @@ import com.jme3.material.Material;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.niftygui.NiftyJmeDisplay;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
+import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.elements.render.TextRenderer;
 import java.util.ArrayList;
-import javax.vecmath.Vector3d;
 
 public class BoardControls 
 {
     
     AssetManager assetManager;
+    ViewPort viewPort, guiViewPort;
     Node boardNode;
-    Material whiteMaterial, blackMaterial, boardMaterial, emptyMaterial, selectedPieceMaterial, suggestedMovementMaterial, suggestedEnemyPieceMove;
+    public static Material whiteMaterial, blackMaterial, boardMaterial, emptyMaterial, selectedPieceMaterial, suggestedMovementMaterial, suggestedEnemyPieceMove;
     BoardType board;    
     ArrayList<String> selectedPotentialMoves;
     Piece selectedPiece;
     Boolean selected = false;
     Boolean isWhiteTurn = true;
-    
+    Nifty nifty;
+    NiftyJmeDisplay niftyDisplay;
     
     
     
     /**
      * Initializes the board by setting all pieces to blank
      */
-    public BoardControls(AssetManager assetManager, Node boardNode, Material emptyMaterial, Material whiteMaterial, Material blackMaterial, Material selectedPieceMaterial, Material suggestedMovementMaterial, Material suggestedEnemyPieceMove)
+    public BoardControls(AssetManager assetManager, ViewPort viewPort, Node boardNode, Material emptyMaterial, Material whiteMaterial, Material blackMaterial, Material selectedPieceMaterial, Material suggestedMovementMaterial, Material suggestedEnemyPieceMove, Nifty nifty, NiftyJmeDisplay niftyDisplay, ViewPort guiViewPort)
     {
         this.assetManager = assetManager;
+        this.viewPort = viewPort;
         this.boardNode = boardNode;
         this.emptyMaterial = emptyMaterial;
         this.whiteMaterial = whiteMaterial;
@@ -37,6 +43,9 @@ public class BoardControls
         this.selectedPieceMaterial = selectedPieceMaterial;
         this.suggestedMovementMaterial = suggestedMovementMaterial;
         this.suggestedEnemyPieceMove = suggestedEnemyPieceMove;
+        this.nifty = nifty;
+        this.niftyDisplay = niftyDisplay;
+        this.guiViewPort = guiViewPort;
         board = new BoardType();
     }
     
@@ -243,8 +252,45 @@ public class BoardControls
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(blackMaterial);
             else if (board.getBoard().get(row).get(col).getPieceType().contains("Empty"))
                 board.getBoard().get(row).get(col).getSpatial().setMaterial(emptyMaterial);                
-        }        
+        }         
+    }
+    
+    private void enablePieceEffect(Piece piece)
+    {
+        Vector3f localTranslation;
         
+        // We are going to set the piece's selected material
+        piece.getSpatial().setMaterial(selectedPieceMaterial);          
+        
+        // We are going to lift the piece into the air
+        localTranslation = piece.getSpatial().getLocalTranslation();
+        localTranslation.setY(5f);
+        piece.getSpatial().setLocalTranslation(localTranslation);
+        
+        // We are going to rotate it in the air
+        SuperChess.beginRotatePiece(piece);
+    }
+    
+    private void disablePieceEffect(Piece piece)
+    {
+        Vector3f localTranslation;
+        
+        // We are going to set the piece's unselectedMaterial
+        if (piece.isWhite() && !piece.getPieceType().contains("Empty"))
+            piece.getSpatial().setMaterial(whiteMaterial);
+        else if (!piece.isWhite() && !piece.getPieceType().contains("Empty"))
+            piece.getSpatial().setMaterial(blackMaterial);
+        else if (piece.getPieceType().contains("Empty"))
+            piece.getSpatial().setMaterial(emptyMaterial);  
+        
+        // We are going to set the piece back down
+        localTranslation = piece.getSpatial().getLocalTranslation();
+        localTranslation.setY(0.5f);
+        piece.getSpatial().setLocalTranslation(localTranslation);
+        
+        // We are going to stop rotation and set it back to normal
+        SuperChess.stopRotatePiece();
+        piece.getSpatial().rotateUpTo(Vector3f.UNIT_Y);
     }
     
     // This fucntion will not be used for castling.
@@ -253,12 +299,18 @@ public class BoardControls
         int startRow = startPiece.getRow();
         int startCol = startPiece.getColumn();
         int endRow = endPiece.getRow();
-        int endCol = endPiece.getColumn();
-        
+        int endCol = endPiece.getColumn();   
+        Piece piece;
         
         // Update the location of the startPiece with the location of the endPiece
         startPiece.setRow(endRow);
-        startPiece.setColumn(endCol);        
+        startPiece.setColumn(endCol);   
+                
+        // The startPiece is now the last piece to be moved, and the previous one is no longer the last one moved.        
+       piece = board.getLastMovedPiece();
+       if (piece != null)
+           piece.setLastMoved(false);
+       startPiece.setLastMoved(true);
 
         // Copy the start piece to the end piece
         board.getBoard().get(endRow).set(endCol, startPiece);
@@ -280,6 +332,9 @@ public class BoardControls
         // Attach the the startPiece with the location of the endPiece to the boardNode
         boardNode.attachChild(board.getBoard().get(endRow).get(endCol).getSpatial());
         startPiece.getSpatial().setLocalTranslation(BoardConstants.vectors.get(endRow).get(endCol)); 
+        
+        // Check for pawn election
+        checkPawnElection();
         
         // Change the turn to the other player and check for checkmate
         nextPlayerTurn();
@@ -333,6 +388,36 @@ public class BoardControls
         nextPlayerTurn();
     }
     
+    private void checkPawnElection()
+    {
+        // If it is white person's turn, we will check to see if a pawn has reached the end, and if so, create a piece for pawn election.
+        if (isWhiteTurn)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                if (board.getBoard().get(0).get(i).getPieceType().contains("Pawn"))
+                {             
+                    nifty.fromXml("Interface/ElectionMenu.xml", "electionMenu", new ElectionController(board, assetManager, boardNode, nifty,  board.getBoard().get(0).get(i)));                                     
+                    guiViewPort.addProcessor(niftyDisplay);
+                }
+            }
+        }
+        
+        // If it is black person's turn
+        else if (!isWhiteTurn)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                if (board.getBoard().get(7).get(i).getPieceType().contains("Pawn"))
+                {             
+                    nifty.fromXml("Interface/ElectionMenu.xml", "electionMenu", new ElectionController(board, assetManager, boardNode, nifty,  board.getBoard().get(7).get(i)));                                     
+                    guiViewPort.addProcessor(niftyDisplay);
+                }
+            }
+            
+        }
+    }
+    
     // This function changes the next player's turn and checks for checkmate 
     private void nextPlayerTurn()
     {
@@ -362,9 +447,12 @@ public class BoardControls
             }
             
             if (checkMate)
-            {
-                // Checkmate!  TODO
-                System.out.println("Black is checkmated!");
+            {            
+                // Black is checkmated
+                nifty.fromXml("Interface/MainMenu.xml", "startScreen", new MainMenuController());    
+                nifty.getScreen("startScreen").findElementByName("startText").getRenderer(TextRenderer.class).setText("BLACK IS CHECKMATED!"); 
+                guiViewPort.addProcessor(niftyDisplay);
+               
             }
             
             else
@@ -397,8 +485,10 @@ public class BoardControls
             
             if (checkMate)
             {
-                // Checkmate!  TODO
-                System.out.println("White is checkmated!");
+                // White is checkmated
+                nifty.fromXml("Interface/MainMenu.xml", "startScreen", new MainMenuController());
+                nifty.getScreen("startScreen").findElementByName("startText").getRenderer(TextRenderer.class).setText("WHITE IS CHECKMATED!"); 
+                guiViewPort.addProcessor(niftyDisplay);                
             }
             
             else
@@ -407,46 +497,7 @@ public class BoardControls
                 isWhiteTurn = true;
             }    
         }      
-    }
-    
-    private void enablePieceEffect(Piece piece)
-    {
-        Vector3f localTranslation;
-        
-        // We are going to set the piece's selected material
-        piece.getSpatial().setMaterial(selectedPieceMaterial);          
-        
-        // We are going to lift the piece into the air
-        localTranslation = piece.getSpatial().getLocalTranslation();
-        localTranslation.setY(5f);
-        piece.getSpatial().setLocalTranslation(localTranslation);
-        
-        // We are going to rotate it in the air
-        SuperChess.beginRotatePiece(piece);
-    }
-    
-    private void disablePieceEffect(Piece piece)
-    {
-        Vector3f localTranslation;
-        
-        // We are going to set the piece's unselectedMaterial
-        if (piece.isWhite() && !piece.getPieceType().contains("Empty"))
-            piece.getSpatial().setMaterial(whiteMaterial);
-        else if (!piece.isWhite() && !piece.getPieceType().contains("Empty"))
-            piece.getSpatial().setMaterial(blackMaterial);
-        else if (piece.getPieceType().contains("Empty"))
-            piece.getSpatial().setMaterial(emptyMaterial);  
-        
-        // We are going to set the piece back down
-        localTranslation = piece.getSpatial().getLocalTranslation();
-        localTranslation.setY(0.5f);
-        piece.getSpatial().setLocalTranslation(localTranslation);
-        
-        // We are going to stop rotation and set it back to normal
-        SuperChess.stopRotatePiece();
-        piece.getSpatial().rotateUpTo(Vector3f.UNIT_Y);
-    }
-    
+    }    
     
     public void setBoard()
     {

@@ -47,17 +47,16 @@ public class Pawn extends Piece
 
                     // A pawn can move two spaces forward at the starting position if there is nothing 2 spaces in front of it
                     if (row == 6 && board.getBoard().get(row - 2).get(col).getPieceType().contains("Empty"))
-                    {
-                        // Since this pawn moved two spaces, it needs to alert any enemy pawns EAST and WEST of it that they can perform en passant
-                        // Is there an enemy pawn to the EAST?
+                    {                        
+                        // If there an enemy pawn to the EAST, we will let that enemy pawn know that it can  do enpassant
                         if (col != 7)
                             if (board.getBoard().get(row - 2).get(col + 1).getPieceType().contains("Pawn") && !board.getBoard().get(row - 2).get(col + 1).isWhite)
                                 ((Pawn) board.getBoard().get(row - 2).get(col + 1)).setEnPassant(true);    
                        
-                        // Is there an emeny pawn to the WEST?
+                        // If there an enemy pawn to the WEST, we will let that enemy pawn know that it can  do enpassant
                         if (col != 0)
                             if (board.getBoard().get(row - 2).get(col - 1).getPieceType().contains("Pawn") && !board.getBoard().get(row - 2).get(col - 1).isWhite)
-                                ((Pawn) board.getBoard().get(row - 2).get(col - 1)).setEnPassant(true);  
+                                ((Pawn) board.getBoard().get(row - 2).get(col - 1)).setEnPassant(true);
                         
                         // Now just set the potential piece movement
                         potentialMoves.add((row - 2) + "," + col);   
@@ -75,6 +74,32 @@ public class Pawn extends Piece
                 if (!board.getBoard().get(row - 1).get(col + 1).getPieceType().contains("Empty") && !board.getBoard().get(row - 1).get(col + 1).isWhite())            
                     potentialMoves.add((row - 1) + "," + (col + 1));             
             
+            // Are we allowed to do en passant?
+            if (this.enPassant)
+            {
+                // An enemy pawn has let us know that we are allowed to do en passant
+                // Was it the enemy pawn to our EAST?
+                if (col != 7)
+                    if (board.getBoard().get(row).get(col + 1).getPieceType().contains("Pawn"))
+                    {
+                      Pawn pawn = (Pawn) board.getBoard().get(row).get(col + 1);
+                      if (pawn.isLastMoved())
+                      {
+                         potentialMoves.add((row -1) + "," + (col + 1));
+                      }
+                    }
+                
+                // Was it the enemy pawn to our WEST?
+                 if (col != 7)
+                     if (board.getBoard().get(row).get(col - 1).getPieceType().contains("Pawn"))
+                     {
+                         Pawn pawn = (Pawn) board.getBoard().get(row).get(col - 1);
+                         if (pawn.isLastMoved())
+                         {
+                             potentialMoves.add((row - 1) + "," + (col - 1));
+                         }
+                    }
+            }
             return board.getKing(true).removeIllegalMoves(row, col, potentialMoves, board);                        
         }
         
@@ -117,6 +142,33 @@ public class Pawn extends Piece
                 if (!board.getBoard().get(row + 1).get(col + 1).getPieceType().contains("Empty") && board.getBoard().get(row + 1).get(col + 1).isWhite())            
                     potentialMoves.add((row + 1) + "," + (col + 1));
             }   
+            
+             // Are we allowed to do en passant?
+            if (this.enPassant)
+            {
+                // An enemy pawn has let us know that we are allowed to do en passant
+                // Was it the enemy pawn to our EAST?
+                if (col != 7)
+                    if (board.getBoard().get(row).get(col + 1).getPieceType().contains("Pawn"))
+                    {
+                      Pawn pawn = (Pawn) board.getBoard().get(row).get(col + 1);
+                      if (pawn.isLastMoved())
+                      {
+                         potentialMoves.add((row + 1) + "," + (col + 1));
+                      }
+                    }
+                
+                // Was it the enemy pawn to our WEST?
+                 if (col != 0)
+                     if (board.getBoard().get(row).get(col - 1).getPieceType().contains("Pawn"))
+                     {
+                         Pawn pawn = (Pawn) board.getBoard().get(row).get(col - 1);
+                         if (pawn.isLastMoved())
+                         {
+                             potentialMoves.add((row + 1) + "," + (col - 1));
+                         }
+                    }
+            }
             
             // Check for placing own king in check!
             return board.getKing(false).removeIllegalMoves(row, col, potentialMoves, board);

@@ -81,7 +81,9 @@ public class King extends Piece
             // 1) it hasnt moved yet. 
             // 2) if it is not in check. 
             // 3) there are no pieces in its way 
-            // 4) a rook exists and that it hasn't moved yet                 
+            // 4) a rook exists and that it hasn't moved yet    
+            // 5) if it does not cross into check on its way to movement
+            
                 // The king cannot have moved yet
                 if (!this.hasMoved)
                 {
@@ -94,7 +96,11 @@ public class King extends Piece
                             // There must be a rook at the edge and it cannot have moved yet either
                             if (board.getBoard().get(7).get(7).getPieceType().contains("Rook") && !((Rook) board.getBoard().get(7).get(7)).getHasMoved())
                             {
-                                potentialMoves.add("7,6");
+                                // It cannot cross passed F1 if there is a potential check there
+                                if (!isThereAThreat(board, "7,5", this.row, this.col, this))
+                                {
+                                    potentialMoves.add("7,6");
+                                }                       
                             }
                         }
                         
@@ -104,7 +110,12 @@ public class King extends Piece
                            // There must be a rook at the edge and it cannot have moved yet either
                             if (board.getBoard().get(7).get(0).getPieceType().contains("Rook") && !((Rook) board.getBoard().get(7).get(0)).getHasMoved())
                             {
-                                potentialMoves.add("7,2");
+                                // It cannot cross passed D1 if there is a potential check there
+                                if (!isThereAThreat(board, "7,3", this.row, this.col, this))
+                                {
+                                   potentialMoves.add("7,2"); 
+                                }
+                                
                             }
                         }                  
                 }     
@@ -168,7 +179,11 @@ public class King extends Piece
                             // There must be a rook at the edge and it cannot have moved yet either
                             if (board.getBoard().get(0).get(7).getPieceType().contains("Rook") && !((Rook) board.getBoard().get(0).get(7)).getHasMoved())
                             {
-                                potentialMoves.add("0,6");
+                                // It cannot cross passed F1 if there is a potential check there
+                                if (!isThereAThreat(board, "0,5", this.row, this.col, this))
+                                {
+                                    potentialMoves.add("0,6");
+                                }                                 
                             }
                         }
                         
@@ -178,7 +193,10 @@ public class King extends Piece
                            // There must be a rook at the edge and it cannot have moved yet either
                             if (board.getBoard().get(0).get(0).getPieceType().contains("Rook") && !((Rook) board.getBoard().get(0).get(0)).getHasMoved())
                             {
-                                potentialMoves.add("0,2");
+                                if (!isThereAThreat(board, "0,3", this.row, this.col, this))
+                                {
+                                    potentialMoves.add("0,2");
+                                }                                
                             }
                         }                       
                     }                            

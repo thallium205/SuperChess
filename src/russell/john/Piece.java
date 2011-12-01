@@ -9,12 +9,14 @@ public class Piece
     protected AssetManager assetManager;       
     protected Spatial piece;
     protected boolean isWhite;
+    protected boolean lastMoved;
     protected int row, col;   
     protected String pieceType;
     
     public Piece()
     {
         this.pieceType = "";
+        this.lastMoved = false;
     }
     public Piece(AssetManager assetManager, Boolean isWhite, int row, int col)
     {
@@ -22,7 +24,7 @@ public class Piece
         this.assetManager = assetManager;
         this.isWhite = isWhite;
         this.row = row;
-        this.col = col;
+        this.col = col;        
     }   
     
     public Spatial getSpatial()
@@ -59,6 +61,17 @@ public class Piece
     {
         this.col = column;
     }
+
+    public boolean isLastMoved() 
+    {
+        return lastMoved;
+    }
+
+    public void setLastMoved(boolean lastMoved) 
+    {
+        this.lastMoved = lastMoved;
+    }
+    
     
     
     

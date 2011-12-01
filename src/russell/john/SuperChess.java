@@ -18,6 +18,7 @@ public class SuperChess extends SimpleApplication
     Vector3f rotateVector = new Vector3f(0,1f,1f);
     PointLight light;
     Nifty nifty;
+    NiftyJmeDisplay niftyDisplay;
     
     // For piece rotation
     private static boolean rotatePiece = false;
@@ -34,10 +35,10 @@ public class SuperChess extends SimpleApplication
     @Override
     public void simpleInitApp() 
     {    
-        viewPort.setBackgroundColor(ColorRGBA.DarkGray);
+        viewPort.setBackgroundColor(ColorRGBA.DarkGray);    
         
         // launch the main menu
-        // launchMainMenu();
+        launchMainMenu();
         
         // set the camera and scene
         buildCamera();  
@@ -46,14 +47,14 @@ public class SuperChess extends SimpleApplication
         buildLighting();
         
         // build the board
-        buildBoard();  
+        buildBoard();         
     }
 
     @Override
     public void simpleUpdate(float tpf) 
     {        
         if (rotatePiece)
-            rotatingPiece.getSpatial().rotate(0, tpf, -1*tpf);
+            rotatingPiece.getSpatial().rotate(0, tpf, 0);
     }
 
     @Override
@@ -76,15 +77,15 @@ public class SuperChess extends SimpleApplication
     
     private void launchMainMenu()
     {
-        NiftyJmeDisplay niftyDisplay = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);
+        niftyDisplay = new NiftyJmeDisplay(assetManager, inputManager, audioRenderer, guiViewPort);
         /** Create a new NiftyGUI object */
         nifty = niftyDisplay.getNifty();
         /** Read your XML and initialize your custom ScreenController */
       //  nifty.fromXml("Interface/MainMenu.xml", "start", new MainMenuController());
-        nifty.fromXml("Interface/Debug.xml", "debugScreen", new DebugController());
-        nifty.getScreen("debugScreen").findElementByName("debugText").getRenderer(TextRenderer.class).setText("FUCK YOU");
+       // nifty.fromXml("Interface/Debug.xml", "debugScreen", new DebugController());
+       // nifty.getScreen("debugScreen").findElementByName("debugText").getRenderer(TextRenderer.class).setText("FUCK YOU");
         // attach the Nifty display to the gui view port as a processor
-        guiViewPort.addProcessor(niftyDisplay);
+      //  guiViewPort.addProcessor(niftyDisplay);
         // disable the fly cam
         // flyCam.setDragToRotate(true);
         
@@ -120,6 +121,6 @@ public class SuperChess extends SimpleApplication
         rootNode.attachChild(boardNode); // put this node in the scene
                
         // Instantiate Board object and pass in the node and asset manager
-        Board board = new Board(boardNode, assetManager, inputManager, cam, nifty, viewPort);  
+        Board board = new Board(boardNode, assetManager, inputManager, cam, nifty, viewPort, niftyDisplay, guiViewPort);  
     }    
 }

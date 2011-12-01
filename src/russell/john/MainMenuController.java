@@ -4,7 +4,7 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
-public class MainMenuController implements ScreenController
+public class MainMenuController extends SuperChess implements ScreenController 
 {
     public MainMenuController()
     { /** constructor */ 
@@ -24,19 +24,10 @@ public class MainMenuController implements ScreenController
     }
     
     // user defined functions
-     public void startGame() 
+     public void newGame() 
      {
-         System.out.println("Game Started!");
-     }
-     
-     public void openGame()
-     {
-         System.out.println("Game Opened!");         
-     }
-     
-     public void closeGame()
-     {
-         System.out.println("Game Closed!"); 
+         this.stop();
+         this.start();         
      }
      
 }
