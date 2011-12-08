@@ -8,9 +8,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
+import com.jme3.system.AppSettings;
 import de.lessvoid.nifty.Nifty;
-import de.lessvoid.nifty.elements.render.TextRenderer;
 
 public class SuperChess extends SimpleApplication 
 {
@@ -26,16 +25,23 @@ public class SuperChess extends SimpleApplication
 
     public static void main(String[] args) 
     {
-        SuperChess app = new SuperChess();
+        SuperChess app = new SuperChess();           
+        
         app.start();
+
     }
     
     private Node boardNode;
 
     @Override
     public void simpleInitApp() 
-    {    
-        viewPort.setBackgroundColor(ColorRGBA.DarkGray);    
+    {     
+        
+
+        
+        viewPort.setBackgroundColor(ColorRGBA.DarkGray);   
+        
+        
         
         // launch the main menu
         launchMainMenu();
@@ -119,6 +125,12 @@ public class SuperChess extends SimpleApplication
         // Create a pivot node at (0,0,0) and attach it to the root node
         boardNode = new Node("boardNode");
         rootNode.attachChild(boardNode); // put this node in the scene
+        
+       fpsText.detachAllChildren();
+       statsView.removeFromParent();
+
+        
+        
                
         // Instantiate Board object and pass in the node and asset manager
         Board board = new Board(boardNode, assetManager, inputManager, cam, nifty, viewPort, niftyDisplay, guiViewPort);  

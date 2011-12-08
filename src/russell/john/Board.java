@@ -120,6 +120,8 @@ public class Board
         boardControls.setBoard();       
     }     
     
+    
+    
     /*
     
     
@@ -180,8 +182,8 @@ public class Board
     
     
    
-  
-    */
+  */
+    
 
 
     
@@ -269,9 +271,7 @@ public class Board
 
     };
    }
-           
-     
-    
+          
     
 
            

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.sourceforge.net/nifty.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty.xsd http://nifty-gui.sourceforge.net/nifty.xsd">
+  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+  <!-- start screen -->
+  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+    <screen id="debugScreen" controller = "russell.john.DebugController">
+        <layer id="layer" backgroundColor="#FFFFFF00" childLayout="vertical">
+            <panel id="debugPanel" height="25%" width="25%" align="right" valign="bottom" backgroundColor="#f60f" childLayout="center" visibleToMouse="false">
+                <text id="debugText" font="aurulent-sans-16.fnt" color="#000f" text="Start Game" align="center" valign="center" />
+            </panel> 
+        </layer>
+            
+    </screen>
+</nifty>

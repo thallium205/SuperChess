@@ -397,8 +397,11 @@ public class BoardControls
             {
                 if (board.getBoard().get(0).get(i).getPieceType().contains("Pawn"))
                 {             
-                    nifty.fromXml("Interface/ElectionMenu.xml", "electionMenu", new ElectionController(board, assetManager, boardNode, nifty,  board.getBoard().get(0).get(i)));                                     
-                    guiViewPort.addProcessor(niftyDisplay);
+                   //  nifty.fromXml("Interface/ElectionMenu.xml", "electionMenu", new ElectionController(board, assetManager, boardNode, nifty,  board.getBoard().get(0).get(i)));                                     
+                   //  guiViewPort.addProcessor(niftyDisplay);
+                    ElectionController e = new ElectionController(board, assetManager, boardNode, nifty,  board.getBoard().get(0).get(i));
+                    e.getQueen();
+                    
                 }
             }
         }
@@ -410,8 +413,10 @@ public class BoardControls
             {
                 if (board.getBoard().get(7).get(i).getPieceType().contains("Pawn"))
                 {             
-                    nifty.fromXml("Interface/ElectionMenu.xml", "electionMenu", new ElectionController(board, assetManager, boardNode, nifty,  board.getBoard().get(7).get(i)));                                     
-                    guiViewPort.addProcessor(niftyDisplay);
+                   //  nifty.fromXml("Interface/ElectionMenu.xml", "electionMenu", new ElectionController(board, assetManager, boardNode, nifty,  board.getBoard().get(7).get(i)));                                     
+                    // guiViewPort.addProcessor(niftyDisplay);
+                    ElectionController e = new ElectionController(board, assetManager, boardNode, nifty,  board.getBoard().get(0).get(i));
+                    e.getQueen();
                 }
             }
             
@@ -451,8 +456,7 @@ public class BoardControls
                 // Black is checkmated
                 nifty.fromXml("Interface/MainMenu.xml", "startScreen", new MainMenuController());    
                 nifty.getScreen("startScreen").findElementByName("startText").getRenderer(TextRenderer.class).setText("BLACK IS CHECKMATED!"); 
-                guiViewPort.addProcessor(niftyDisplay);
-               
+                guiViewPort.addProcessor(niftyDisplay);               
             }
             
             else
